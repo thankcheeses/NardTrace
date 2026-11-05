@@ -21,6 +21,21 @@ const CONFUSABLE = {
   'ո': 'n', 'ν': 'v', 'ο': 'o', 'α': 'a', 'ρ': 'p', 'ı': 'i',
 }
 const MULTI = [['rn', 'm'], ['vv', 'w'], ['cl', 'd'], ['nn', 'm']]
+// Generic words that get glued onto a brand name to make a "new" company domain.
+const SUFFIX_WORDS = ['us', 'usa', 'uk', 'inc', 'corp', 'co', 'llc', 'ltd', 'group', 'global', 'international', 'intl', 'solutions', 'services', 'systems',
+  'technologies', 'technology', 'tech', 'nologies', 'nology', 'consulting', 'consultants', 'staffing', 'hq', 'official', 'online', 'it', 'software', 'labs', 'digital', 'jobs', 'careers']
+
+/** Strip trailing generic words: 'miratechnologiesgroupllc' -> 'mira', 'miratechus' -> 'mira'. Returns [stem, suffixes]. */
+export function stem(label) {
+  let s = label.toLowerCase().replace(/[-_]/g, '')
+  const stripped = []
+  let changed = true
+  while (changed && s.length > 3) {
+    changed = false
+    for (const w of SUFFIX_WORDS) if (s.length > w.length + 2 && s.endsWith(w)) { s = s.slice(0, -w.length); stripped.unshift(w); changed = true; break }
+  }
+  return [s, stripped]
+}
 
 export function skeleton(label) {
   let s = [...label.toLowerCase()].map((ch) => CONFUSABLE[ch] ?? ch).join('').replaceAll('i', 'l')
@@ -60,6 +75,12 @@ export function compare(candidate, trusted) {
   }
   if (!reasons.length && tLabel.length >= 4 && candidate.toLowerCase().replace(candRd, '').includes(tLabel)) {
     reasons.push(`Uses '${tLabel}' as a subdomain of an unrelated domain ('${candRd}').`)
+  }
+  if (!reasons.length) {
+    const [cs, csuf] = stem(cLabelU), [ts, tsuf] = stem(tLabel)
+    if (cs.length >= 4 && cs === ts && (csuf.length || tsuf.length)) {
+      reasons.push(`Same company name '${cs}' with different generic words attached ('${cLabelU}' vs '${tLabel}'). Many unrelated firms share short names; this is weak on its own.`)
+    }
   }
   return reasons.length ? { candidate, registered_domain: candRd, resembles: trustRd, reasons } : null
 }

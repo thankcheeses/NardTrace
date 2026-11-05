@@ -45,6 +45,26 @@ _CONFUSABLE = {
     "ѕ": "s", "ԁ": "d", "ɡ": "g", "ո": "n", "ν": "v", "ο": "o", "α": "a", "ρ": "p", "ı": "i",
 }
 _MULTI = [("rn", "m"), ("vv", "w"), ("cl", "d"), ("nn", "m")]
+# Generic words that get glued onto a brand name to make a "new" company domain.
+_SUFFIX_WORDS = ["us", "usa", "uk", "inc", "corp", "co", "llc", "ltd", "group", "global", "international", "intl", "solutions", "services",
+                 "systems", "technologies", "technology", "tech", "nologies", "nology", "consulting", "consultants", "staffing", "hq",
+                 "official", "online", "it", "software", "labs", "digital", "jobs", "careers"]
+
+
+def stem(label: str) -> tuple[str, list[str]]:
+    """Strip trailing generic words: 'miratechnologiesgroupllc' -> 'mira', 'miratechus' -> 'mira'."""
+    s = label.lower().replace("-", "").replace("_", "")
+    stripped: list[str] = []
+    changed = True
+    while changed and len(s) > 3:
+        changed = False
+        for w in _SUFFIX_WORDS:
+            if len(s) > len(w) + 2 and s.endswith(w):
+                s = s[: -len(w)]
+                stripped.insert(0, w)
+                changed = True
+                break
+    return s, stripped
 
 
 def skeleton(label: str) -> str:
@@ -106,6 +126,12 @@ def compare(candidate: str, trusted: str) -> dict[str, Any] | None:
         # A trusted brand name sitting in a subdomain: paypal.com.secure-login.example
         if len(t_label) >= 4 and t_label in candidate.lower().replace(cand_rd, ""):
             reasons.append(f"Uses '{t_label}' as a subdomain of an unrelated domain ('{cand_rd}').")
+    if not reasons:
+        cs, csuf = stem(c_label_u)
+        ts, tsuf = stem(t_label)
+        if len(cs) >= 4 and cs == ts and (csuf or tsuf):
+            reasons.append(f"Same company name '{cs}' with different generic words attached ('{c_label_u}' vs '{t_label}'). "
+                           "Many unrelated firms share short names; this is weak on its own.")
     if not reasons:
         return None
     return {"candidate": candidate, "registered_domain": cand_rd, "resembles": trust_rd, "reasons": reasons}

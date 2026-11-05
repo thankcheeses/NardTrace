@@ -307,7 +307,23 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
     if (summary.return_path_domain) tasks.push(dnsQuery(summary.return_path_domain, 'TXT').then((r) => { live.spf_record = { domain: summary.return_path_domain, ...r, spf: r.records.filter((x) => x.toLowerCase().startsWith('v=spf1')) } }))
     if (summary.from_domain) { const org = registeredDomain(summary.from_domain); tasks.push(dnsQuery(`_dmarc.${org}`, 'TXT').then((r) => { live.dmarc_record = { domain: org, ...r, dmarc: r.records.filter((x) => x.toLowerCase().startsWith('v=dmarc1')) } })) }
     for (const sig of auth.dkim_signatures) if (sig.d && sig.s) tasks.push(dnsQuery(`${sig.s}._domainkey.${sig.d}`, 'TXT').then((r) => live.dkim_keys.push({ selector: sig.s, domain: sig.d, ...r })))
+    if (summary.from_domain) tasks.push(dnsQuery(summary.from_domain, 'MX').then((r) => { live.mx = { domain: summary.from_domain, ...r } }))
     await Promise.all(tasks)
+    // Does the sender domain's own mail provider match the server that delivered the message?
+    if (live.mx && live.mx.status === 'ok' && handoff) {
+      const mxHosts = live.mx.records.map((x) => registeredDomain(x.split(' ').pop().replace(/\.$/, '')))
+      const handoffOrg = registeredDomain(handoff.from_rdns || handoff.from_helo || '')
+      const match = mxHosts.includes(handoffOrg)
+      live.mx_consistent = match
+      findings.push(finding(MODULE, match ? 'Sending server matches the sender domain\'s own mail provider' : 'Sending server differs from the sender domain\'s mail provider',
+        Status.EXTERNAL_INTEL, `${summary.from_domain} receives mail at ${mxHosts.join(', ')}; the message was handed off by ${handoffOrg || handoff.from_ip}.`,
+        `DNS MX for ${summary.from_domain} compared with the hand-off Received header.`,
+        match ? 'The domain is really set up at the provider that sent this message, which is what a genuine company mailbox looks like.'
+              : 'Mail for this domain lives somewhere else. Bulk senders and spoofers often send from infrastructure the domain owner does not use; marketing platforms do this legitimately too.',
+        match ? 'That the company behind the domain is honest, or that the account was not compromised.' : 'That the message is forged; check SPF/DKIM/DMARC above.',
+        Confidence.MEDIUM, match ? 'Judge the sender on the content and the company, not the infrastructure.' : 'Weigh with the authentication results.',
+        { severity: match ? Severity.INFO : Severity.LOW, data: { mx: mxHosts, handoff: handoffOrg } }))
+    }
     auth.live_dns = live
     const checks = [live.spf_record, live.dmarc_record, ...live.dkim_keys].filter(Boolean)
     if (checks.length && checks.every((c) => c.status === 'error')) findings.push(unknown(MODULE, 'Live DNS authentication checks failed', 'SPF/DMARC/DKIM DNS lookups', checks[0].error || 'unknown', 'Rely on the header results above; retry later.'))

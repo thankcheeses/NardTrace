@@ -434,8 +434,28 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
             if sig["d"] and sig["s"]:
                 r = dns_query(f"{sig['s']}._domainkey.{sig['d']}", "TXT")
                 live["dkim_keys"].append({"selector": sig["s"], "domain": sig["d"], **r.to_dict()})
+        if summary["from_domain"]:
+            r = dns_query(summary["from_domain"], "MX")
+            live["mx"] = {"domain": summary["from_domain"], **r.to_dict()}
+            if r.status == "ok" and handoff:
+                mx_hosts = [registered_domain(x.split(" ")[-1].rstrip(".")) for x in r.records]
+                handoff_org = registered_domain(handoff["from_rdns"] or handoff["from_helo"] or "")
+                match = handoff_org in mx_hosts
+                live["mx_consistent"] = match
+                findings.append(Finding(
+                    MODULE, "Sending server matches the sender domain's own mail provider" if match
+                    else "Sending server differs from the sender domain's mail provider", Status.EXTERNAL_INTEL,
+                    f"{summary['from_domain']} receives mail at {', '.join(mx_hosts)}; the message was handed off by {handoff_org or handoff['from_ip']}.",
+                    f"DNS MX for {summary['from_domain']} compared with the hand-off Received header.",
+                    "The domain is really set up at the provider that sent this message, which is what a genuine company mailbox looks like." if match
+                    else "Mail for this domain lives somewhere else. Bulk senders and spoofers often send from infrastructure the domain owner does not use; marketing platforms do this legitimately too.",
+                    "That the company behind the domain is honest, or that the account was not compromised." if match
+                    else "That the message is forged; check SPF/DKIM/DMARC above.",
+                    Confidence.MEDIUM, "Judge the sender on the content and the company, not the infrastructure." if match else "Weigh with the authentication results.",
+                    severity=Severity.INFO if match else Severity.LOW, data={"mx": mx_hosts, "handoff": handoff_org},
+                ))
         auth["live_dns"] = live
-        checks = [v for k, v in live.items() if k != "dkim_keys"] + live["dkim_keys"]
+        checks = [v for k, v in live.items() if k not in ("dkim_keys", "mx_consistent")] + live["dkim_keys"]
         if checks and all(c["status"] == "error" for c in checks):
             findings.append(unknown(MODULE, "Live DNS authentication checks failed", "SPF/DMARC/DKIM DNS lookups",
                                     checks[0]["error"] or "unknown", "Rely on the header results above; retry later."))

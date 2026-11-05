@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from nardtrace import domain_intel
 from nardtrace.domain_intel import age_days, analyze_domain, parse_domain_rdap
-from nardtrace.lookalike import brand_matches, compare, skeleton
+from nardtrace.lookalike import brand_matches, compare, skeleton, stem
 from nardtrace.lookups import DNSResult
 
 RDAP = {  # synthetic RDAP domain response
@@ -70,3 +70,26 @@ def test_lookalike_rules():
     assert compare("example.org", "paypal.com") is None
     assert brand_matches("paypal.com") == []
     assert skeleton("rn1cr0soft") == skeleton("microsoft")
+
+
+def test_stem_lookalike():
+    assert stem("miratechnologiesgroupllc")[0] == "mira" and stem("miratechus")[0] == "mira"
+    assert "Same company name 'mira'" in compare("miratechus.com", "miratechnologiesgroupllc.com")["reasons"][0]
+    assert "Same company name 'acme'" in compare("acme.com", "acmeinc.com")["reasons"][0]
+    assert compare("example.org", "paypal.com") is None
+
+
+def test_mx_consistency_finding(monkeypatch, fixture_bytes):
+    from nardtrace import email_analyzer
+    from nardtrace.lookups import DNSResult
+
+    def fake_dns(name, rtype):
+        if rtype == "MX":
+            return DNSResult(name, rtype, "ok", ["0 staffing-vendor-example.mail.protection.outlook.com."])
+        return DNSResult(name, rtype, "error", error="stubbed")
+    monkeypatch.setattr(email_analyzer, "dns_query", fake_dns)
+    monkeypatch.setattr(email_analyzer, "analyze_ip", lambda ip, **k: {"findings": [], "abuse_contacts": []})
+    monkeypatch.setattr(email_analyzer, "analyze_domain", lambda *a, **k: {"findings": [], "abuse_contacts": []})
+    r = email_analyzer.analyze_email(fixture_bytes("recruiter_blast.eml"), lookup=True)
+    f = next(x for x in r["findings"] if x["title"].startswith("Sending server matches"))
+    assert f["status"] == "EXTERNAL INTEL" and f["data"]["handoff"] == "outlook.com"

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { analyzeEmail, parseAuthResults, parseReceived } from '../src/engine/email.js'
 import { analyzeBytes, analyzeHash, detectType } from '../src/engine/hash.js'
-import { brandMatches, compare, skeleton } from '../src/engine/lookalike.js'
+import { brandMatches, compare, skeleton, stem } from '../src/engine/lookalike.js'
 import { setOffline } from '../src/engine/lookups.js'
 import { defang, ipCategory, parseIp, refang, registeredDomain } from '../src/engine/net.js'
 import { analyzeIp, parseRdapIp } from '../src/engine/ip.js'
@@ -223,5 +223,14 @@ describe('scam signals', () => {
     expect(t('https://docs.google.com/forms/d/e/x/viewform')[0]).toMatch(/Form or file-sharing/)
     expect(t('https://acme-corp.com/login#victim@example.net')).toContain('Your email address is embedded in the link')
     expect(t('https://www.paypal.com/signin')).toEqual([])
+  })
+})
+
+describe('name-stem lookalikes and MX consistency', () => {
+  it('shared company stem with different generic suffixes', () => {
+    expect(stem('miratechnologiesgroupllc')[0]).toBe('mira'); expect(stem('miratechus')[0]).toBe('mira'); expect(stem('miratechgroup')[0]).toBe('mira')
+    expect(compare('miratechus.com', 'miratechnologiesgroupllc.com').reasons[0]).toMatch(/Same company name 'mira'/)
+    expect(compare('acme.com', 'acmeinc.com').reasons[0]).toMatch(/Same company name 'acme'/)
+    expect(compare('example.org', 'paypal.com')).toBeNull()
   })
 })
