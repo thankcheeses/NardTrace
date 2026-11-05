@@ -1,0 +1,72 @@
+Delivered-To: recipient@example.net
+Received: by 2002:a05:7300:5f13:b0:12a:6a1c:2b1d with SMTP id k19csp1234567dyb;
+        Tue, 21 Oct 2025 07:14:09 -0700 (PDT)
+X-Received: by 2002:a05:620a:1234:b0:7a1:b2c3:d4e5 with SMTP id a1mr123456qkb.12.1761056049123;
+        Tue, 21 Oct 2025 07:14:09 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1761056049; cv=none; d=google.com; s=arc-20240605; b=SYNTHETICARCSEAL
+Return-Path: <billing.dept.notice.demo@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id a1-20020a05620a123400b007a1b2c3d4e5sor1234567qkb.12.2025.10.21.07.14.08
+        for <recipient@example.net>
+        (Google Transport Security);
+        Tue, 21 Oct 2025 07:14:08 -0700 (PDT)
+Received-SPF: pass (google.com: domain of billing.dept.notice.demo@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=AbCdEf12;
+       spf=pass (google.com: domain of billing.dept.notice.demo@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=billing.dept.notice.demo@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1761056048; x=1761660848; dara=google.com;
+        h=to:subject:message-id:date:from:reply-to:mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=SYNTHETICBODYHASH=; b=SYNTHETICSIGNATURE
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=1e100.net; s=20230601; b=SYNTHETIC
+X-Gm-Message-State: AOJu0YwSYNTHETICSTATEVALUE
+X-Google-Smtp-Source: AGHT+IHSYNTHETICSOURCEVALUE
+X-Received: by 2002:a05:620a:1234:b0:7a1:b2c3:d4e5 with SMTP id a1mr98765qkb.4.1761056048000;
+        Tue, 21 Oct 2025 07:14:08 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 2002:a05:620a:1234:b0:7a1:b2c3:d4e5 with HTTP; Tue, 21 Oct 2025 07:14:07 -0700 (PDT)
+Reply-To: paypal.resolution.center.demo@outlook.com
+From: "PayPal Billing Department" <billing.dept.notice.demo@gmail.com>
+Date: Tue, 21 Oct 2025 07:14:07 -0700
+Message-ID: <CAF0SYNTHETIC1234567890abcdef@mail.gmail.com>
+Subject: Your account has been limited - action required
+To: recipient@example.net
+Content-Type: multipart/mixed; boundary="0000000000001234abcd"
+
+--0000000000001234abcd
+Content-Type: multipart/alternative; boundary="0000000000001234abce"
+
+--0000000000001234abce
+Content-Type: text/plain; charset="UTF-8"
+
+Dear Customer,
+
+We detected unusual activity and your account has been limited.
+Confirm your identity within 24 hours to avoid permanent suspension:
+https://secure-paypa1-review.top/login?case=88213
+
+Or call our resolution desk.
+
+PayPal Billing Department
+
+--0000000000001234abce
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Dear Customer,</p>
+<p>We detected unusual activity and your account has been <b>limited</b>.</p>
+<p><a href="https://www.google.com/url?q=https://secure-paypa1-review.top/login?case%3D88213&amp;sa=D">https://www.paypal.com/signin</a></p>
+<p>PayPal Billing Department</p>
+</body></html>
+
+--0000000000001234abce--
+
+--0000000000001234abcd
+Content-Type: application/pdf; name="Account_Statement.pdf"
+Content-Disposition: attachment; filename="Account_Statement.pdf"
+Content-Transfer-Encoding: base64
+
+PGh0bWw+PGJvZHk+PHA+TmFyZFRyYWNlIHN5bnRoZXRpYyBkZW1vIGF0dGFjaG1lbnQgLSBub3QgcmVhbGx5IGEgUERGLjwvcD48L2JvZHk+PC9odG1sPgo=
+
+--0000000000001234abcd--

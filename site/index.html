@@ -67,6 +67,7 @@
     <header class="top">
       <a class="brand" href="./"><img src="favicon.svg" alt="">NardTrace</a>
       <nav class="top">
+        <a href="app/">Open the app</a>
         <a href="#modules">Modules</a>
         <a href="#evidence">Evidence tags</a>
         <a href="demo/">Demo report</a>
@@ -78,9 +79,10 @@
       <h1>Turn a suspicious email into an <span>evidence report</span>.</h1>
       <p class="say">Say it <b>“nerd-trace.”</b> The name plays on Baynard.</p>
       <p class="lede">NardTrace is an email and infrastructure investigation workbench. Investigate an email, IP address, domain, URL or file hash, and get a report you can send to a provider, a platform, or law enforcement. Every finding says how it is known and what it does <em>not</em> prove.</p>
+      <p class="say">The web edition runs entirely in your browser: your email never leaves your device. Only read-only DNS and registry lookups go out.</p>
       <div class="cta">
-        <a class="btn primary" href="demo/">See a real demo report</a>
-        <a class="btn ghost" href="https://github.com/thankcheeses/NardTrace#quick-start">Run it locally</a>
+        <a class="btn primary" href="app/">Open NardTrace</a>
+        <a class="btn ghost" href="demo/">See a sample report</a>
       </div>
       <div class="shot"><img src="screenshots/case.png" alt="A NardTrace case: export buttons, a generated abuse email, evidence with SHA-256 hashes, and timestamped notes." width="1440" height="1000"></div>
     </div>
@@ -133,7 +135,7 @@
 
     <section id="run">
       <h2>Run it</h2>
-      <p class="sub">GitHub Pages can't run NardTrace itself, because the analyzers need a server. Run it on your own computer:</p>
+      <p class="sub"><a href="app/">Open the web edition</a> and start investigating. Prefer to keep everything on your own machine, or want reputation lookups (AbuseIPDB, VirusTotal)? Run the server edition:</p>
       <pre>git clone https://github.com/thankcheeses/NardTrace.git
 cd NardTrace
 docker compose up --build
