@@ -9,6 +9,8 @@ import { BRANDS, brandInText, brandMatches, compare, dedupe } from './lookalike.
 import { dnsQuery } from './lookups.js'
 import { EMAIL_RE, IPV4_RE, defang, emailDomain, ipCategory, isPublicIp, parseIp, registeredDomain } from './net.js'
 import { matchProvider } from './providers.js'
+import { LIKELY_TYPE, scanContent } from './scamsignals.js'
+const LIKELY = (id) => LIKELY_TYPE[id]
 import { heuristics as urlHeuristics, parseUrl, unwrap } from './url.js'
 
 const MODULE = 'email'
@@ -46,7 +48,7 @@ function topLevelSplit(text, keywords) {
   return out
 }
 
-const IPV6_BRACKET = /\[(?:IPv6:)?([0-9a-fA-F:.]*:[0-9a-fA-F:.]+)\]/g
+const IPV6_BRACKET = /[\[(](?:IPv6:)?([0-9a-fA-F:.]*:[0-9a-fA-F:.]+)[\])]/g
 const IPV4_BRACKET = /\[(\d{1,3}(?:\.\d{1,3}){3})\]/g
 
 function ipsIn(text) {
@@ -194,8 +196,10 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
     const fhost = h.from_rdns || h.from_helo || ''
     if (!receiverDomain || registeredDomain(fhost) !== receiverDomain) { handoff = h; break }
   }
-  if (!handoff && publicHops.length) handoff = publicHops[0]
-  const earliest = publicHops[0] || null
+  // External public hops only: hops written by the receiver's own servers are not sender-side evidence.
+  const external = publicHops.filter((h) => !receiverDomain || registeredDomain(h.from_rdns || h.from_helo || '') !== receiverDomain)
+  if (!handoff && external.length) handoff = external[0]
+  const earliest = external[0] || null
   const route = { hops, count: hops.length, receiver_domain: receiverDomain, handoff_hop: handoff?.hop ?? null, handoff_ip: handoff?.from_ip ?? null,
                   earliest_public_ip: earliest?.from_ip ?? null }
 
@@ -215,8 +219,8 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
     "It is almost never the sender's own computer or location. It identifies infrastructure (an email provider or server), not a person.",
     receiverDomain ? Confidence.MEDIUM : Confidence.LOW, 'Run IP intelligence on this address to find the operator and its abuse contact.',
     { data: { ip: handoff.from_ip, hop: handoff.hop } }))
-  if (hops.length && !publicHops.length) findings.push(finding(MODULE, 'No public IP address in the route', Status.CONFIRMED,
-    'Every IP in the Received headers is private, reserved, or missing.', 'Received headers',
+  if (hops.length && !handoff) findings.push(finding(MODULE, 'No public sender-side IP in the route', Status.CONFIRMED,
+    'Every IP in the Received headers is private, reserved, missing, or belongs to the receiving provider itself.', 'Received headers',
     'The sender-side infrastructure cannot be identified from these headers (they may be internal-only, incomplete, or use documentation/test addresses).',
     'Where the message came from.', Confidence.HIGH, "Obtain the complete original headers from your mail provider ('Show original')."))
   if (earliest && handoff && earliest !== handoff) findings.push(finding(MODULE, `Earliest recorded public IP: ${earliest.from_ip}`, Status.ASSUMPTION,
@@ -260,6 +264,15 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
     else if (m.method === 'dmarc' && !auth.dmarc) auth.dmarc = { result: m.result, header_from: m.properties['header.from'] || null }
   }
   if (!auth.spf && receivedSpf.length) auth.spf = { result: receivedSpf[0].trim().split(' ')[0].toLowerCase(), domain: summary.return_path_domain, source: 'Received-SPF' }
+  // Gmail reports forwarded/ARC results inside a comment: arc=pass (i=1 spf=pass spfdomain=x dkim=pass dkdomain=y dmarc=pass fromdomain=z)
+  const arcComment = /arc=pass\s*\(([^)]*)\)/i.exec(get('authentication-results')[0] || '')
+  if (arcComment) {
+    const kv = Object.fromEntries([...arcComment[1].matchAll(/([a-z]+)=([^\s;]+)/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]))
+    if (!auth.dkim.length && kv.dkim) auth.dkim.push({ result: kv.dkim, domain: kv.dkdomain || null, selector: null, source: 'ARC (i=1)' })
+    if (!auth.dmarc && kv.dmarc) auth.dmarc = { result: kv.dmarc, header_from: kv.fromdomain || null, source: 'ARC (i=1)' }
+    if (!auth.spf && kv.spf) auth.spf = { result: kv.spf, domain: kv.spfdomain || null, source: 'ARC (i=1)' }
+    auth.arc_sealed = true
+  }
   auth.dkim_signatures = get('dkim-signature').map((sig) => {
     const tags = Object.fromEntries([...sig.replace(/\s+/g, '').matchAll(/\b([a-z]+)=([^;]*)/g)].map((m) => [m[1], m[2]]))
     return { d: tags.d || null, s: tags.s || null, a: tags.a || null }
@@ -280,11 +293,11 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
   const spf = auth.spf || {}
   authFinding('SPF', spf.result, `result=${spf.result} for envelope domain ${spf.domain}`,
     'The sending server was authorized to send for the envelope (Return-Path) domain.', "The sending server was NOT authorized by the envelope domain's SPF record.")
-  if (auth.dkim.length) for (const d of auth.dkim) authFinding('DKIM', d.result, `result=${d.result} for d=${d.domain} (selector ${d.selector})`,
+  if (auth.dkim.length) for (const d of auth.dkim) authFinding('DKIM', d.result, `result=${d.result} for d=${d.domain}` + (d.selector ? ` (selector ${d.selector})` : '') + (d.source ? ` via ${d.source}` : ''),
     `The message carries a valid cryptographic signature from ${d.domain} and was not altered in transit.`, 'The DKIM signature did not verify.')
   else authFinding('DKIM', null)
   const dm = auth.dmarc || {}
-  authFinding('DMARC', dm.result, `result=${dm.result} for header.from=${dm.header_from}`,
+  authFinding('DMARC', dm.result, `result=${dm.result} for header.from=${dm.header_from}` + (dm.source ? ` via ${dm.source}` : ''),
     'The visible From domain is aligned with a passing SPF or DKIM result.', 'The visible From domain is NOT backed by aligned SPF/DKIM — a strong spoofing indicator.')
 
   // ---- live DNS checks (optional)
@@ -401,6 +414,27 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
     for (const a of risky) for (const f of a.findings) findings.push({ ...f, title: `Attachment ${a.filename}: ${f.title}` })
   }
 
+  // ---- content patterns: what does this message read like?
+  const hdrMap = Object.fromEntries(['to', 'cc', 'delivered-to', 'list-unsubscribe', 'precedence', 'references'].map((k) => [k, get(k)[0] || '']))
+  const scam = scanContent({ subject: summary.subject, text: msg.text || '', html: msg.html || '', headers: hdrMap, summary, attachments, links })
+  for (const c of scam.categories) findings.push(finding(MODULE, `Content pattern: ${c.label} (${c.matches.length} phrase${c.matches.length > 1 ? 's' : ''})`, Status.ASSUMPTION,
+    c.matches.map((m) => `“${m.snippet}”`).join(' · '), 'Keyword and phrase patterns in the subject and body (FTC / CISA / IC3 scam indicators).', c.meaning,
+    'That the message is a scam. Legitimate mail uses these words too; weigh this with the authentication, link and sender findings.',
+    c.matches.length >= 2 ? Confidence.MEDIUM : Confidence.LOW, 'Verify any request through a channel you already trust, never through this message.',
+    { severity: c.severity, data: { category: c.id, matches: c.matches } }))
+  for (const st of scam.structural) findings.push(finding(MODULE, st.label, Status.CONFIRMED, st.detail, 'Message headers and structure.',
+    st.id === 'self_addressed' || st.id === 'bcc' ? 'One message went to a hidden list of people. Mass mailings look like this, whether marketing, recruiting or scams.' :
+    st.id === 'callback' ? 'Moving you to a phone call takes the conversation away from anything your email provider can filter.' :
+    st.id === 'thread_reuse' ? 'Replying inside an old thread makes a message look like part of a conversation you already had.' :
+    'A structural trait associated with bulk or evasive mail.', 'That the message is fraudulent on its own.', Confidence.HIGH,
+    st.id === 'callback' ? 'Do not call the number. Find the company\'s number on its own website.' : 'Weigh together with the content patterns above.', { severity: st.severity, data: st }))
+  if (scam.likely_type) findings.push(finding(MODULE, `Reads like: ${scam.likely_type}`, Status.ASSUMPTION,
+    `Top pattern category: ${scam.categories.find((c) => LIKELY(c.id) === scam.likely_type)?.label || ''}; ${scam.categories.length} categories matched, pattern score ${scam.score}.`,
+    'Combined content-pattern analysis.', 'The wording follows a known scam template. This is a classification of the text, not proof of intent.',
+    'Who sent it or why. A real recruiter, vendor or colleague can trigger the same patterns.', Confidence.MEDIUM,
+    'Treat it as that kind of scam until independently verified: confirm with the organization through a number or site you already know.',
+    { severity: scam.score >= 9 ? Severity.HIGH : scam.score >= 4 ? Severity.MEDIUM : Severity.LOW, data: { likely_type: scam.likely_type, score: scam.score } }))
+
   // ---- sending provider (inference)
   const signalDomains = new Set()
   if (handoff) for (const host of [handoff.from_rdns, handoff.from_helo]) if (host) signalDomains.add(registeredDomain(host))
@@ -422,7 +456,8 @@ export async function analyzeEmail(input, { trustedDomain = null, lookup = false
     'Use IP Intelligence on the hand-off IP — the RDAP owner and abuse contact are authoritative.'))
 
   const result = { kind: 'email', summary, route, originating_headers: originating, authentication: auth, mismatches, display_name_flags: dispFlags,
-                   lookalikes, links, attachments, sending_provider: sendingProvider, provider_candidates: providers, raw_headers: rawHeaders,
+                   lookalikes, links, attachments, scam_signals: { likely_type: scam.likely_type, score: scam.score, categories: scam.categories, structural: scam.structural, phones: scam.phones },
+                   sending_provider: sendingProvider, provider_candidates: providers, raw_headers: rawHeaders,
                    lookups_performed: lookup }
 
   if (lookup) {

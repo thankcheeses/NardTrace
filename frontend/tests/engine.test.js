@@ -8,7 +8,8 @@ import { defang, ipCategory, parseIp, refang, registeredDomain } from '../src/en
 import { analyzeIp, parseRdapIp } from '../src/engine/ip.js'
 import { analyzeDomain, parseDomainRdap } from '../src/engine/domain.js'
 import { buildAbuseEmail, buildMarkdown, riskScore } from '../src/engine/reports.js'
-import { analyzeUrl, unwrap } from '../src/engine/url.js'
+import { scanContent, websiteHeuristics } from '../src/engine/scamsignals.js'
+import { analyzeUrl, parseUrl, unwrap } from '../src/engine/url.js'
 
 const fx = (n) => new Uint8Array(readFileSync(new URL(`../../backend/tests/fixtures/${n}`, import.meta.url)))
 const titles = (r) => r.findings.map((f) => f.title)
@@ -69,7 +70,7 @@ describe('email', () => {
     expect(r.mismatches.some((m) => m.header === 'Reply-To')).toBe(true)
     expect(r.lookalikes.some((h) => h.candidate === 'rnicrosoft-billing.com' && h.resembles === 'microsoft.com')).toBe(true)
     expect(r.route.handoff_ip).toBeNull()
-    expect(titles(r)).toContain('No public IP address in the route')
+    expect(titles(r)).toContain('No public sender-side IP in the route')
     expect(r.sending_provider).toBeNull()
   })
   it('reply-to, display name, links, attachments', async () => {
@@ -185,5 +186,42 @@ describe('reports', () => {
     const ae = buildAbuseEmail(bundle)
     expect(ae.subject).toMatch(/^Abuse report/); expect(ae.body).toContain('hxxps://secure-paypa1-review[.]top'); expect(ae.body).toContain('Full headers')
     expect(riskScore(r.findings).level).toBe('High')
+  })
+})
+
+
+describe('scam signals', () => {
+  it('recruiter blast: ARC-forwarded auth, parenthesized IPv6 hop, bulk classification', async () => {
+    const r = await analyzeEmail(fx('recruiter_blast.eml'))
+    expect(r.authentication.dkim[0]).toMatchObject({ result: 'pass', domain: 'staffing-vendor.example', source: 'ARC (i=1)' })
+    expect(r.authentication.dmarc).toMatchObject({ result: 'pass', source: 'ARC (i=1)' })
+    expect(r.route.hops[0].from_ip).toBe('2603:10b6:8:100::9')
+    expect(r.scam_signals.likely_type).toMatch(/^Bulk staffing/)
+    expect(r.scam_signals.structural.map((s) => s.id)).toEqual(expect.arrayContaining(['self_addressed', 'thread_reuse']))
+    expect(byTitle(r, 'Reads like: Bulk staffing').status).toBe('ASSUMPTION')
+    expect(byTitle(r, 'Addressed to the sender').status).toBe('CONFIRMED')
+  })
+  it('tech-support callback: phone-only CTA and hidden text', async () => {
+    const r = await analyzeEmail(fx('techsupport_callback.eml'))
+    expect(r.scam_signals.likely_type).toMatch(/^Tech-support/)
+    const ids = r.scam_signals.structural.map((s) => s.id)
+    expect(ids).toContain('callback'); expect(ids).toContain('hidden')
+    expect(byTitle(r, 'Reads like').severity).toBe('high')
+    expect(r.scam_signals.phones[0].replace(/\D/g, '')).toBe('18885550147')
+  })
+  it('spoof fixture reads like credential phishing', async () => {
+    const r = await analyzeEmail(fx('spoof_dmarc_fail.eml'))
+    expect(r.scam_signals.likely_type).toMatch(/^Credential phishing/)
+  })
+  it('plain text with no templates matches nothing', () => {
+    const s = scanContent({ subject: 'Lunch Thursday?', text: 'Hey Sam, are we still on for lunch Thursday at noon? Best, Alex' })
+    expect(s.categories).toEqual([]); expect(s.likely_type).toBeNull(); expect(s.score).toBe(0)
+  })
+  it('fake-website heuristics', () => {
+    const t = (u) => websiteHeuristics(parseUrl(u)).map((h) => h.title)
+    expect(t('https://paypal-secure-login.weebly.com/signin')).toEqual(expect.arrayContaining([expect.stringMatching(/free\/shared platform/), expect.stringMatching(/Brand name 'paypal'/), expect.stringMatching(/Login\/verify-style path/)]))
+    expect(t('https://docs.google.com/forms/d/e/x/viewform')[0]).toMatch(/Form or file-sharing/)
+    expect(t('https://acme-corp.com/login#victim@example.net')).toContain('Your email address is embedded in the link')
+    expect(t('https://www.paypal.com/signin')).toEqual([])
   })
 })

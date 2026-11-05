@@ -23,6 +23,7 @@ from .lookups import dns_query
 from .netutil import (EMAIL_RE, IPV4_RE, defang, email_domain, ip_category, is_public_ip, parse_ip,
                       registered_domain)
 from .providers import match_provider
+from .scam_signals import LIKELY_TYPE, scan_content
 from .url_analyzer import heuristics as url_heuristics
 from .url_analyzer import parse_url, unwrap
 
@@ -78,7 +79,7 @@ def _top_level_split(text: str, keywords: tuple[str, ...]) -> dict[str, str]:
     return out
 
 
-_IPV6_BRACKET = re.compile(r"\[(?:IPv6:)?([0-9a-fA-F:.]*:[0-9a-fA-F:.]+)\]")
+_IPV6_BRACKET = re.compile(r"[\[(](?:IPv6:)?([0-9a-fA-F:.]*:[0-9a-fA-F:.]+)[\])]")
 _IPV4_BRACKET = re.compile(r"\[(\d{1,3}(?:\.\d{1,3}){3})\]")
 
 
@@ -233,9 +234,12 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
         if not receiver_domain or registered_domain(fhost) != receiver_domain:
             handoff = h
             break
-    if handoff is None and public_hops:
-        handoff = public_hops[0]
-    earliest_public = public_hops[0] if public_hops else None
+    # External public hops only: hops written by the receiver's own servers are not sender-side evidence.
+    external = [h for h in public_hops if not receiver_domain
+                or registered_domain(h["from_rdns"] or h["from_helo"] or "") != receiver_domain]
+    if handoff is None and external:
+        handoff = external[0]
+    earliest_public = external[0] if external else None
     route = {"hops": hops, "count": len(hops), "receiver_domain": receiver_domain,
              "handoff_hop": handoff["hop"] if handoff else None,
              "handoff_ip": handoff["from_ip"] if handoff else None,
@@ -277,10 +281,10 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
             "Run IP intelligence on this address to find the operator and its abuse contact.",
             data={"ip": handoff["from_ip"], "hop": handoff["hop"]},
         ))
-    if hops and not public_hops:
+    if hops and handoff is None:
         findings.append(Finding(
-            MODULE, "No public IP address in the route", Status.CONFIRMED,
-            "Every IP in the Received headers is private, reserved, or missing.", "Received headers",
+            MODULE, "No public sender-side IP in the route", Status.CONFIRMED,
+            "Every IP in the Received headers is private, reserved, missing, or belongs to the receiving provider itself.", "Received headers",
             "The sender-side infrastructure cannot be identified from these headers (they may be internal-only, "
             "incomplete, or use documentation/test addresses).",
             "Where the message came from.", Confidence.HIGH,
@@ -357,6 +361,17 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
     if auth["spf"] is None and received_spf:
         res = received_spf[0].strip().split(" ", 1)[0].lower()
         auth["spf"] = {"result": res, "domain": summary["return_path_domain"], "source": "Received-SPF"}
+    # Gmail reports forwarded/ARC results inside a comment: arc=pass (i=1 spf=pass spfdomain=x dkim=pass dkdomain=y dmarc=pass fromdomain=z)
+    arc_m = re.search(r"arc=pass\s*\(([^)]*)\)", ar_raw[0] if ar_raw else "", re.I)
+    if arc_m:
+        kv = {k.lower(): v.lower() for k, v in re.findall(r"([a-z]+)=([^\s;]+)", arc_m.group(1), re.I)}
+        if not auth["dkim"] and kv.get("dkim"):
+            auth["dkim"].append({"result": kv["dkim"], "domain": kv.get("dkdomain"), "selector": None, "source": "ARC (i=1)"})
+        if auth["dmarc"] is None and kv.get("dmarc"):
+            auth["dmarc"] = {"result": kv["dmarc"], "header_from": kv.get("fromdomain"), "source": "ARC (i=1)"}
+        if auth["spf"] is None and kv.get("spf"):
+            auth["spf"] = {"result": kv["spf"], "domain": kv.get("spfdomain"), "source": "ARC (i=1)"}
+        auth["arc_sealed"] = True
     dkim_sigs = []
     for sig in msg.get_all("DKIM-Signature") or []:
         tags = dict(re.findall(r"\b([a-z]+)=([^;]*)", re.sub(r"\s+", "", str(sig))))
@@ -392,13 +407,13 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
                   "The sending server was NOT authorized by the envelope domain's SPF record.")
     if auth["dkim"]:
         for d in auth["dkim"]:
-            _auth_finding("DKIM", d["result"], f"result={d['result']} for d={d['domain']} (selector {d['selector']})",
+            _auth_finding("DKIM", d["result"], f"result={d['result']} for d={d['domain']}" + (f" (selector {d['selector']})" if d.get("selector") else "") + (f" via {d['source']}" if d.get("source") else ""),
                           f"The message carries a valid cryptographic signature from {d['domain']} and was not "
                           "altered in transit.", "The DKIM signature did not verify.")
     else:
         _auth_finding("DKIM", None, "", "", "")
     dm = auth["dmarc"] or {}
-    _auth_finding("DMARC", dm.get("result"), f"result={dm.get('result')} for header.from={dm.get('header_from')}",
+    _auth_finding("DMARC", dm.get("result"), f"result={dm.get('result')} for header.from={dm.get('header_from')}" + (f" via {dm['source']}" if dm.get("source") else ""),
                   "The visible From domain is aligned with a passing SPF or DKIM result.",
                   "The visible From domain is NOT backed by aligned SPF/DKIM — a strong spoofing indicator.")
 
@@ -614,6 +629,56 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
                                         status=Status(f["status"]), confidence=Confidence(f["confidence"]),
                                         severity=Severity(f["severity"])))
 
+    # ---- content patterns: what does this message read like?
+    text_body, html_body = "", ""
+    for part in msg.walk():
+        if part.is_multipart() or part.get_filename():
+            continue
+        try:
+            c = part.get_content()
+        except (LookupError, ValueError):
+            continue
+        if isinstance(c, str):
+            if part.get_content_type() == "text/plain" and not text_body:
+                text_body = c
+            elif part.get_content_type() == "text/html" and not html_body:
+                html_body = c
+    hdr_map = {k: str(msg.get(k) or "") for k in ("to", "cc", "delivered-to", "list-unsubscribe", "precedence", "references")}
+    scam = scan_content(subject=summary["subject"], text=text_body, html=html_body, headers=hdr_map, summary=summary,
+                        attachments=attachments, links=links)
+    for c in scam["categories"]:
+        n = len(c["matches"])
+        findings.append(Finding(
+            MODULE, f"Content pattern: {c['label']} ({n} phrase{'s' if n > 1 else ''})", Status.ASSUMPTION,
+            " · ".join(f"“{m['snippet']}”" for m in c["matches"]),
+            "Keyword and phrase patterns in the subject and body (FTC / CISA / IC3 scam indicators).", c["meaning"],
+            "That the message is a scam. Legitimate mail uses these words too; weigh this with the authentication, link and sender findings.",
+            Confidence.MEDIUM if n >= 2 else Confidence.LOW, "Verify any request through a channel you already trust, never through this message.",
+            severity=Severity(c["severity"]), data={"category": c["id"], "matches": c["matches"]},
+        ))
+    for st in scam["structural"]:
+        meaning = {
+            "self_addressed": "One message went to a hidden list of people. Mass mailings look like this, whether marketing, recruiting or scams.",
+            "bcc": "One message went to a hidden list of people. Mass mailings look like this, whether marketing, recruiting or scams.",
+            "callback": "Moving you to a phone call takes the conversation away from anything your email provider can filter.",
+            "thread_reuse": "Replying inside an old thread makes a message look like part of a conversation you already had.",
+        }.get(st["id"], "A structural trait associated with bulk or evasive mail.")
+        findings.append(Finding(MODULE, st["label"], Status.CONFIRMED, st["detail"], "Message headers and structure.", meaning,
+                                "That the message is fraudulent on its own.", Confidence.HIGH,
+                                "Do not call the number. Find the company's number on its own website." if st["id"] == "callback"
+                                else "Weigh together with the content patterns above.", severity=Severity(st["severity"]), data=st))
+    if scam["likely_type"]:
+        top = next((c["label"] for c in scam["categories"] if LIKELY_TYPE.get(c["id"]) == scam["likely_type"]), "")
+        findings.append(Finding(
+            MODULE, f"Reads like: {scam['likely_type']}", Status.ASSUMPTION,
+            f"Top pattern category: {top}; {len(scam['categories'])} categories matched, pattern score {scam['score']}.",
+            "Combined content-pattern analysis.", "The wording follows a known scam template. This is a classification of the text, not proof of intent.",
+            "Who sent it or why. A real recruiter, vendor or colleague can trigger the same patterns.", Confidence.MEDIUM,
+            "Treat it as that kind of scam until independently verified: confirm with the organization through a number or site you already know.",
+            severity=Severity.HIGH if scam["score"] >= 9 else Severity.MEDIUM if scam["score"] >= 4 else Severity.LOW,
+            data={"likely_type": scam["likely_type"], "score": scam["score"]},
+        ))
+
     # ---- sending provider (inference)
     signal_domains = set()
     for h in ([handoff] if handoff else []):
@@ -653,7 +718,7 @@ def analyze_email(raw: bytes, *, trusted_domain: str | None = None, lookup: bool
     result: dict[str, Any] = {
         "kind": "email", "summary": summary, "route": route, "originating_headers": originating,
         "authentication": auth, "mismatches": mismatches, "display_name_flags": disp_flags,
-        "lookalikes": lookalikes, "links": links, "attachments": attachments,
+        "lookalikes": lookalikes, "links": links, "attachments": attachments, "scam_signals": scam,
         "sending_provider": sending_provider, "provider_candidates": providers,
         "raw_headers": raw_headers, "lookups_performed": lookup,
     }

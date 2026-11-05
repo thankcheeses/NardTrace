@@ -55,7 +55,7 @@ def test_spoof_failures_and_lookalikes(fixture_bytes):
     assert any(h["candidate"] == "rnicrosoft-billing.com" and h["resembles"] == "microsoft.com" for h in r["lookalikes"])
     # Documentation-range IPs are not treated as public, so there is no hand-off
     assert r["route"]["handoff_ip"] is None
-    assert "No public IP address in the route" in titles(r)
+    assert "No public sender-side IP in the route" in titles(r)
     # Microsoft headers added by the receiving tenant must not be read as the sender's provider
     assert r["sending_provider"] is None
 

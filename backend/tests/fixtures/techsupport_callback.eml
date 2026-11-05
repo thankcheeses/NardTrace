@@ -1,0 +1,16 @@
+Delivered-To: recipient@example.net
+Received: from mail-relay.example.com (mail-relay.example.com [203.0.113.5]) by mx.example.net (Postfix) with ESMTPS id 1122AABB for <recipient@example.net>; Wed, 1 Oct 2025 09:30:04 +0000 (UTC)
+From: "Norton Billing Dept" <invoice.desk.demo@gmail.com>
+To: recipient@example.net
+Subject: Invoice #58213 - Your Norton 360 subscription has been renewed - $399.99
+Date: Wed, 1 Oct 2025 09:30:00 +0000
+Message-ID: <synthetic-ts@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Dear Customer,</p>
+<p>Your Norton 360 subscription has been auto-renewed and $399.99 has been charged to your account.</p>
+<p>If you did not authorize this charge, call our customer care at +1 (888) 555-0147 within 24 hours to cancel and request a refund.</p>
+<p style="display:none">lorem ipsum filler text to defeat filters</p>
+</body></html>
