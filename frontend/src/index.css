@@ -2,18 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body { @apply bg-slate-950 text-slate-200 antialiased; }
+:root {
+  --ink-950: #070B14; --ink-900: #0B1220; --ink-800: #101A2E; --line: #1E2D48;
+  --text: #E6EDF7; --muted: #8392AE; --trace: #22D3EE;
+  --confirmed: #34D399; --intel: #60A5FA; --assume: #FBBF24; --unknown: #94A3B8; --danger: #FB7185;
 }
+
+@layer base {
+  html { color-scheme: dark; }
+  body { @apply bg-ink-950 text-[#E6EDF7] antialiased; font-feature-settings: "cv11", "ss01"; }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(900px 500px at 8% -10%, rgba(34,211,238,.10), transparent 60%),
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px) 0 0 / 100% 40px,
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0 / 40px 100%;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.35) 60%, transparent);
+  }
+  #root { position: relative; z-index: 1; }
+  :focus-visible { outline: 2px solid var(--trace); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: rgba(34,211,238,.3); }
+}
+
 @layer components {
-  .card { @apply rounded-xl border border-slate-800 bg-slate-900/60 p-5; }
-  .input { @apply w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply btn bg-sky-600 text-white hover:bg-sky-500; }
-  .btn-ghost { @apply btn border border-slate-700 text-slate-200 hover:bg-slate-800; }
-  .btn-danger { @apply btn border border-rose-800 text-rose-300 hover:bg-rose-950; }
-  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400; }
-  .mono { @apply font-mono text-[12px] break-all; }
-  .th { @apply px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-slate-400; }
+  .card { @apply rounded-2xl border border-line bg-ink-900/80 p-5 shadow-card backdrop-blur-sm; }
+  .card-tight { @apply rounded-xl border border-line bg-ink-900/80 p-4; }
+  .input { @apply w-full rounded-lg border border-line bg-ink-950/80 px-3 py-2 text-sm text-[#E6EDF7] placeholder-[#5B6A86] transition focus:border-trace/60 focus:outline-none focus:ring-2 focus:ring-trace/25; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40; }
+  .btn-primary { @apply btn bg-trace text-ink-950 hover:bg-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.25)]; }
+  .btn-ghost { @apply btn border border-line-strong text-[#E6EDF7] hover:bg-ink-800 hover:border-[#3A4F74]; }
+  .btn-danger { @apply btn border border-danger/40 text-danger hover:bg-danger/10; }
+  .label { @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8392AE]; }
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8392AE]; }
+  .mono { @apply font-mono text-[12.5px] break-all; }
+  .th { @apply px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8392AE]; }
   .td { @apply px-3 py-2 align-top text-sm; }
+  .h1 { @apply font-display text-[24px] sm:text-[28px] font-semibold leading-tight tracking-[-0.01em] text-white; }
+  .h2 { @apply font-display text-base font-semibold tracking-wide text-[#E6EDF7]; }
+}
+
+@keyframes pulse-ring { 0% { transform: scale(.85); opacity: .9 } 100% { transform: scale(1.9); opacity: 0 } }
+.pulse-ring::after { content: ""; position: absolute; inset: -4px; border-radius: 9999px; border: 2px solid var(--trace); animation: pulse-ring 1.8s ease-out infinite; }
+@keyframes dash { to { stroke-dashoffset: 0 } }
+.trace-draw { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: dash 1.4s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) { .pulse-ring::after { animation: none; opacity: .5 } .trace-draw { animation: none; stroke-dashoffset: 0 } }
+
+@media print {
+  body::before { display: none; }
+  body { background: #fff !important; color: #0f172a !important; }
 }

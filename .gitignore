@@ -10,3 +10,4 @@ frontend/dist/
 *.eml.local
 cases/
 _site/
+frontend/dist-pages/
