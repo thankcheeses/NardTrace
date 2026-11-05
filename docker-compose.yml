@@ -1,0 +1,15 @@
+services:
+  nardtrace:
+    build: .
+    image: nardtrace:latest
+    ports:
+      - "127.0.0.1:8000:8000"   # bound to localhost only: evidence stays on this machine
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - nardtrace-data:/data
+    restart: unless-stopped
+
+volumes:
+  nardtrace-data:

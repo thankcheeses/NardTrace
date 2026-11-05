@@ -1,0 +1,34 @@
+Received: from DM6PR12MB1234.namprd12.prod.outlook.com (2603:10b6:5:1c0::10)
+ by SN6PR12MB5678.namprd12.prod.outlook.com with HTTPS; Mon, 3 Nov 2025 14:02:11 +0000
+Received: from BN8NAM12FT034.eop-nam12.prod.protection.outlook.com
+ (2603:10b6:408:e0:cafe::5a) by DM6PR12MB1234.outlook.office365.com
+ (2603:10b6:5:1c0::10) with Microsoft SMTP Server; Mon, 3 Nov 2025 14:02:10 +0000
+Authentication-Results: spf=fail (sender IP is 198.51.100.23)
+ smtp.mailfrom=rnicrosoft-billing.com; dkim=none (message not signed)
+ header.d=none;dmarc=fail action=quarantine header.from=microsoft.com;compauth=fail reason=000
+Received-SPF: Fail (protection.outlook.com: domain of rnicrosoft-billing.com does not
+ designate 198.51.100.23 as permitted sender) receiver=protection.outlook.com;
+ client-ip=198.51.100.23; helo=mail.rnicrosoft-billing.com;
+Received: from mail.rnicrosoft-billing.com (198.51.100.23) by
+ BN8NAM12FT034.mail.protection.outlook.com (10.13.182.140) with Microsoft SMTP
+ Server id 15.20.8000.0; Mon, 3 Nov 2025 14:02:09 +0000
+Received: from localhost (localhost [127.0.0.1])
+ by mail.rnicrosoft-billing.com (Postfix) with ESMTP id 4A1B2C3D4E
+ for <user@example.org>; Mon, 3 Nov 2025 14:02:08 +0000
+Return-Path: bounce@rnicrosoft-billing.com
+From: "Microsoft 365 Security <security@microsoft.com>" <security@microsoft.com>
+Reply-To: <helpdesk@rnicrosoft-billing.com>
+To: <user@example.org>
+Subject: Password expires today
+Date: Mon, 3 Nov 2025 14:02:07 +0000
+Message-ID: <20251103140207.4A1B2C3D4E@mail.rnicrosoft-billing.com>
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-Microsoft-Antispam: BCL:0;
+X-Mailer: PHPMailer 6.8.0
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Your Microsoft 365 password expires today.</p>
+<p><a href="http://198.51.100.23:8080/owa/login.php">Keep current password</a></p>
+<form action="https://login.rnicrosoft-billing.com/collect"></form>
+</body></html>

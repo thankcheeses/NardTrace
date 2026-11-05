@@ -1,0 +1,13 @@
+Received: from mx-in.example.org (mx-in.example.org [192.0.2.10])
+	by mailstore.example.org (Postfix) with ESMTPS id 1122AABB
+	for <someone@example.org>; Wed, 1 Oct 2025 09:30:05 +0000 (UTC)
+Received: from smtp.mail-relay.example.com (smtp.mail-relay.example.com [203.0.113.5])
+	by mx-in.example.org (Postfix) with ESMTP id 99887766
+	for <someone@example.org>; Wed, 1 Oct 2025 09:30:04 +0000 (UTC)
+X-Originating-IP: [203.0.113.77]
+X-Sender-IP: 203.0.113.77
+From: Prize Office <claims@prize-office.example.com>
+To: someone@example.org
+Subject: You have won
+Date: Wed, 1 Oct 2025 09:30:00 +0000
+Message-ID: <abc123@prize-office.example.com>

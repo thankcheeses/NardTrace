@@ -1,0 +1,11 @@
+.env
+data/
+backend/data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+node_modules/
+frontend/dist/
+*.eml.local
+cases/
