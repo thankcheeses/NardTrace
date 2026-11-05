@@ -1,14 +1,16 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useCases } from '../CaseContext'
+import { Icon } from './icons'
 
+/** [path, label, icon name from components/icons.jsx] */
 const NAV = [
-  ['/', 'Desk', 'M3 11l9-8 9 8M5 10v10h14V10'],
-  ['/email', 'Email', 'M3 6h18v12H3zM3 6l9 7 9-7'],
-  ['/ip', 'IP address', 'M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'],
-  ['/domain', 'Domain', 'M4 7h16M4 12h16M4 17h10'],
-  ['/url', 'URL', 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1'],
-  ['/file', 'File & hash', 'M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6'],
-  ['/cases', 'Cases & reports', 'M4 6h6l2 2h8v11H4z'],
+  ['/', 'Desk', 'desk'],
+  ['/email', 'Email', 'email'],
+  ['/ip', 'IP address', 'ip'],
+  ['/domain', 'Domain', 'domain'],
+  ['/url', 'URL', 'url'],
+  ['/file', 'File & hash', 'file'],
+  ['/cases', 'Cases & reports', 'cases'],
 ]
 
 export default function Layout() {
@@ -34,9 +36,9 @@ export default function Layout() {
           <div><div className="font-display text-lg font-semibold tracking-tight text-white">NardTrace</div><div className="text-[11px] text-[#5B6A86]">say it “nerd-trace”</div></div>
         </div>
         <nav className="flex-1 space-y-0.5 px-3">
-          {NAV.map(([to, label, d]) => (
+          {NAV.map(([to, label, icon]) => (
             <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${isActive ? 'bg-trace/10 text-trace' : 'text-[#8392AE] hover:bg-ink-800 hover:text-[#E6EDF7]'}`}>
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>{label}
+              <Icon name={icon} className="h-4 w-4 shrink-0" />{label}
             </NavLink>
           ))}
         </nav>

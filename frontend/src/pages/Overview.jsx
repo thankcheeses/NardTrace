@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCases } from '../CaseContext'
 import { collectAll } from '../components/Verdict'
 import { riskScore } from '../engine/reports'
-import { ErrorBox, PageHeader, Pill, Stat, StatusBadge } from '../components/ui'
+import { Empty, ErrorBox, PageHeader, Pill, Stat, StatusBadge } from '../components/ui'
 
 function classify(v) {
   const t = v.trim()
@@ -65,12 +65,12 @@ export default function Overview() {
             <Link key={c.id} to={`/cases/${c.id}`} className="flex items-center justify-between gap-3 border-b border-line py-2.5 text-sm last:border-0 hover:text-trace">
               <span className="truncate"><span className="mr-2 font-mono text-[11px] text-[#5B6A86]">#{c.id}</span>{c.title}</span>
               <span className="flex shrink-0 items-center gap-2 text-xs text-[#8392AE]">{r && <Pill tone={r.score >= 60 ? 'red' : r.score >= 30 ? 'amber' : 'slate'}>{r.level}</Pill>}{c.analysis_count} analyses</span>
-            </Link>) }) : <p className="text-sm text-[#5B6A86]">No cases yet. Create one from Cases & reports, or load the demo case.</p>}
+            </Link>) }) : <Empty icon="cases">No cases yet. Create one from Cases &amp; reports, or load the demo case.</Empty>}
         </section>
         <section className="card">
           <h2 className="h2 mb-3">How findings are labelled</h2>
           <div className="space-y-2 text-sm text-[#B4C0D6]">
-            {[['CONFIRMED', 'seen directly in the evidence'], ['EXTERNAL INTEL', 'reported by registries, DNS or reputation services'], ['ASSUMPTION', 'an inference that could be wrong'], ['UNKNOWN', 'could not be determined; never guessed']].map(([s, d]) => <div key={s} className="flex items-start gap-2"><StatusBadge status={s} className="mt-0.5" /><span>{d}</span></div>)}
+            {[['CONFIRMED', 'seen directly in the evidence'], ['EXTERNAL INTEL', 'reported by registries, DNS or reputation services'], ['ASSUMPTION', 'an inference that could be wrong'], ['UNKNOWN', 'could not be determined; never guessed']].map(([s, d]) => <div key={s} className="flex items-start gap-2"><StatusBadge status={s} icon className="mt-0.5" /><span>{d}</span></div>)}
           </div>
           <p className="mt-4 border-t border-line pt-3 text-xs leading-relaxed text-[#5B6A86]">An IP address identifies a network, never a person. Location is always approximate. NardTrace never visits links or opens attachments.</p>
         </section>
