@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Icon, STATUS_ICON } from './icons'
 
 export const STATUS_STYLE = {
   'CONFIRMED': 'bg-confirmed/10 text-confirmed ring-confirmed/40',
@@ -9,8 +10,13 @@ export const STATUS_STYLE = {
 export const STATUS_COLOR = { 'CONFIRMED': '#34D399', 'EXTERNAL INTEL': '#60A5FA', 'ASSUMPTION': '#FBBF24', 'UNKNOWN': '#94A3B8' }
 export const SEV_STYLE = { high: 'bg-danger', medium: 'bg-warn', low: 'bg-assume', info: 'bg-unk/60' }
 
-export function StatusBadge({ status, className = '' }) {
-  return <span className={`inline-flex shrink-0 items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.08em] ring-1 ring-inset ${STATUS_STYLE[status] || STATUS_STYLE.UNKNOWN} ${className}`}>{status}</span>
+export function StatusBadge({ status, className = '', icon = false }) {
+  return (
+    <span className={`inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.08em] ring-1 ring-inset ${STATUS_STYLE[status] || STATUS_STYLE.UNKNOWN} ${className}`}>
+      {icon && <Icon name={STATUS_ICON[status] || 'unknown'} className="h-3 w-3" strokeWidth={2} />}
+      {status}
+    </span>
+  )
 }
 export function SevDot({ severity }) {
   return <span title={`severity: ${severity}`} className={`inline-block h-2 w-2 shrink-0 rounded-full ${SEV_STYLE[severity] || SEV_STYLE.info}`} />
@@ -52,7 +58,7 @@ export function Collapsible({ title, children, defaultOpen = false }) {
   return (
     <div className="rounded-xl border border-line bg-ink-900/60">
       <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm font-medium text-[#E6EDF7] hover:bg-ink-800/60">
-        {title}<span className="text-[#5B6A86]">{open ? '▾' : '▸'}</span>
+        {title}<Icon name={open ? 'chevronDown' : 'chevronRight'} className="h-4 w-4 shrink-0 text-[#5B6A86]" />
       </button>
       {open && <div className="border-t border-line p-4">{children}</div>}
     </div>
@@ -60,7 +66,29 @@ export function Collapsible({ title, children, defaultOpen = false }) {
 }
 export function CopyButton({ text, label = 'Copy' }) {
   const [done, setDone] = useState(false)
-  return <button type="button" className="btn-ghost px-2.5 py-1 text-xs" onClick={async () => { try { await navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 1500) } catch { /* ignore */ } }}>{done ? 'Copied ✓' : label}</button>
+  return (
+    <button type="button" className="btn-ghost px-2.5 py-1 text-xs" onClick={async () => { try { await navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 1500) } catch { /* ignore */ } }}>
+      <Icon name={done ? 'check' : 'copy'} className={`h-3.5 w-3.5 ${done ? 'text-confirmed' : ''}`} />
+      {done ? 'Copied' : label}
+    </button>
+  )
+}
+
+/**
+ * Empty state. A single large line mark over one sentence of plain copy.
+ *
+ * The mark is one of the set's own glyphs at low opacity: it says which
+ * surface is empty without inventing a character or a scene. `action` takes
+ * the button that fills the surface, when there is one.
+ */
+export function Empty({ icon = 'cases', children, action, className = '' }) {
+  return (
+    <div className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-line px-6 py-10 text-center ${className}`}>
+      <Icon name={icon} className="h-10 w-10 text-[#2A3C5C]" strokeWidth={1.2} />
+      <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#5B6A86]">{children}</p>
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  )
 }
 export function Pill({ children, tone = 'slate' }) {
   const tones = { slate: 'bg-ink-700 text-[#B4C0D6]', red: 'bg-danger/10 text-danger ring-1 ring-danger/40', green: 'bg-confirmed/10 text-confirmed ring-1 ring-confirmed/40',

@@ -5,7 +5,8 @@ import { FindingsList } from '../components/Findings'
 import { ReportPanel } from '../components/ReportPanel'
 import { DomainSummary, IPSummary } from '../components/Intel'
 import { EvidenceBar, collectAll } from '../components/Verdict'
-import { Collapsible, CopyButton, ErrorBox, PageHeader, Pill, Section, Spinner } from '../components/ui'
+import { Collapsible, CopyButton, Empty, ErrorBox, PageHeader, Pill, Section, Spinner } from '../components/ui'
+import { Icon } from '../components/icons'
 import { EmailResult } from './EmailPage'
 
 function download(name, text, type = 'text/markdown') { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); URL.revokeObjectURL(a.href) }
@@ -67,8 +68,10 @@ export default function CaseDetail() {
               <div className="mono mt-1 text-[#8392AE]">sha256 {e.sha256}</div>
               <div className="mt-2 flex items-center gap-3"><button className="text-xs text-trace hover:underline" onClick={() => doVerify(e.id)}>Verify integrity</button>
                 {backend.evidenceUrl(id, e.id) ? <a className="text-xs text-trace hover:underline" href={backend.evidenceUrl(id, e.id)}>Download original</a> : <button className="text-xs text-trace hover:underline" onClick={() => backend.downloadEvidence(id, e.id).then(load)}>Download original</button>}
-                {verify[e.id] && (verify[e.id].ok ? <Pill tone="green">hash matches ✓</Pill> : <Pill tone="red">MISMATCH</Pill>)}</div>
-            </li>))}</ul> : <p className="text-sm text-[#5B6A86]">No uploaded artifacts yet.</p>}
+                {verify[e.id] && (verify[e.id].ok
+                  ? <Pill tone="green"><Icon name="verify" className="mr-1 h-3 w-3" strokeWidth={2} />hash matches</Pill>
+                  : <Pill tone="red">MISMATCH</Pill>)}</div>
+            </li>))}</ul> : <Empty icon="attach">No uploaded artifacts yet. Anything you upload is stored by SHA-256 and logged in the chain of custody.</Empty>}
         </Section>
         <Section eyebrow="Timestamped" title={`Notes (${data.notes.length})`}>
           <form onSubmit={addNote} className="mb-3 flex gap-2"><input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note…" /><button className="btn-ghost">Add</button></form>
