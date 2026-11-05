@@ -9,3 +9,4 @@ node_modules/
 frontend/dist/
 *.eml.local
 cases/
+_site/

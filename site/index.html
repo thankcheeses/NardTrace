@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NardTrace</title>
+  <meta name="description" content="NardTrace (say it “nerd-trace”) is an email and infrastructure investigation workbench that turns a suspicious email into an evidence report you can send to providers, platforms, or law enforcement.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #020617; --panel: #0f172a; --line: #1e293b; --text: #e2e8f0; --muted: #94a3b8;
+      --accent: #38bdf8; --accent-strong: #0284c7;
+      --confirmed: #34d399; --intel: #38bdf8; --assumption: #fbbf24; --unknown: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+           font: 16px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: var(--accent); }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 600; font-size: 18px; }
+    .brand img { width: 32px; height: 32px; }
+    nav.top a { color: var(--muted); text-decoration: none; margin-left: 18px; font-size: 14px; }
+    nav.top a:hover { color: #fff; }
+    .hero { padding: 48px 0 32px; }
+    .hero h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.1; margin: 0 0 16px; color: #fff; letter-spacing: -0.02em; }
+    .hero h1 span { color: var(--accent); }
+    .say { color: var(--muted); font-size: 15px; margin: 0 0 20px; }
+    .say b { color: var(--text); }
+    .lede { font-size: 18px; color: #cbd5e1; max-width: 720px; margin: 0 0 28px; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-block; padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 15px; text-decoration: none; }
+    .btn.primary { background: var(--accent-strong); color: #fff; }
+    .btn.primary:hover { background: #0ea5e9; }
+    .btn.ghost { border: 1px solid #334155; color: var(--text); }
+    .btn.ghost:hover { background: var(--panel); }
+    .shot { margin: 40px 0 8px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); }
+    .shot img { display: block; width: 100%; height: auto; }
+    section { padding: 40px 0; border-top: 1px solid var(--line); }
+    h2 { font-size: 24px; color: #fff; margin: 0 0 8px; }
+    .sub { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+    .card h3 { margin: 0 0 6px; font-size: 16px; color: #fff; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; margin-bottom: 8px; }
+    .t-c { color: var(--confirmed); background: rgba(52,211,153,.12); box-shadow: inset 0 0 0 1px rgba(52,211,153,.4); }
+    .t-e { color: var(--intel); background: rgba(56,189,248,.12); box-shadow: inset 0 0 0 1px rgba(56,189,248,.4); }
+    .t-a { color: var(--assumption); background: rgba(251,191,36,.12); box-shadow: inset 0 0 0 1px rgba(251,191,36,.4); }
+    .t-u { color: var(--unknown); background: rgba(148,163,184,.15); box-shadow: inset 0 0 0 1px rgba(148,163,184,.4); }
+    .gallery { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .gallery figure { margin: 0; }
+    .gallery a { display: block; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .gallery img { display: block; width: 100%; height: auto; }
+    .gallery figcaption { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    ul.rules { margin: 0; padding-left: 20px; color: #cbd5e1; }
+    ul.rules li { margin: 6px 0; }
+    pre { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto;
+          font: 13px/1.6 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; color: #e2e8f0; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 560px) { nav.top { display: none; } .hero { padding-top: 24px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="./"><img src="favicon.svg" alt="">NardTrace</a>
+      <nav class="top">
+        <a href="#modules">Modules</a>
+        <a href="#evidence">Evidence tags</a>
+        <a href="demo/">Demo report</a>
+        <a href="https://github.com/thankcheeses/NardTrace">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <h1>Turn a suspicious email into an <span>evidence report</span>.</h1>
+      <p class="say">Say it <b>“nerd-trace.”</b> The name plays on Baynard.</p>
+      <p class="lede">NardTrace is an email and infrastructure investigation workbench. Investigate an email, IP address, domain, URL or file hash, and get a report you can send to a provider, a platform, or law enforcement. Every finding says how it is known and what it does <em>not</em> prove.</p>
+      <div class="cta">
+        <a class="btn primary" href="demo/">See a real demo report</a>
+        <a class="btn ghost" href="https://github.com/thankcheeses/NardTrace#quick-start">Run it locally</a>
+      </div>
+      <div class="shot"><img src="screenshots/case.png" alt="A NardTrace case: export buttons, a generated abuse email, evidence with SHA-256 hashes, and timestamped notes." width="1440" height="1000"></div>
+    </div>
+
+    <section id="modules">
+      <h2>Six modules, one case file</h2>
+      <p class="sub">Analyses attach to a case. The case keeps the original evidence, a chain-of-custody log, and your notes, and exports everything as one report.</p>
+      <div class="grid">
+        <div class="card"><h3>Email Analyzer</h3><p>Full Received-hop route, the hand-off server into your provider, SPF/DKIM/DMARC, From/Reply-To mismatches, display-name spoofing, lookalike domains, links and attachments.</p></div>
+        <div class="card"><h3>IP Intelligence</h3><p>Registry owner and ASN via RDAP, the network's abuse contact, reverse DNS, approximate network-level location, optional reputation.</p></div>
+        <div class="card"><h3>Domain Intelligence</h3><p>DNS records, SPF and DMARC policy, registrar and abuse contact, domain-age warnings, lookalike detection.</p></div>
+        <div class="card"><h3>URL Analyzer</h3><p>Defangs links and decodes Safe Links, Proofpoint and redirect wrappers from the URL text. It never visits the link.</p></div>
+        <div class="card"><h3>File &amp; Hash</h3><p>MD5, SHA-1 and SHA-256, plus the file's real type from its first bytes. Nothing is opened or run.</p></div>
+        <div class="card"><h3>Cases &amp; Reports</h3><p>PDF and Markdown reports (with a redacted option), a chain-of-custody log, and a copy-ready abuse email for the contacts found.</p></div>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <h2>Every finding is labelled by how it is known</h2>
+      <p class="sub">Each finding states what was found, where the evidence came from, what it means, what it does not establish, how confident NardTrace is, and what to do next.</p>
+      <div class="grid">
+        <div class="card"><span class="tag t-c">CONFIRMED</span><p>Seen directly in the evidence: headers, file bytes, link text.</p></div>
+        <div class="card"><span class="tag t-e">EXTERNAL INTEL</span><p>Reported by a third party: registries, DNS, geolocation, reputation services.</p></div>
+        <div class="card"><span class="tag t-a">ASSUMPTION</span><p>An inference, such as which provider sent the mail. Reasonable, but it could be wrong.</p></div>
+        <div class="card"><span class="tag t-u">UNKNOWN</span><p>Could not be determined. The error is shown. Results are never filled in with guesses.</p></div>
+      </div>
+    </section>
+
+    <section id="screens">
+      <h2>Screens</h2>
+      <p class="sub">Captured in offline mode, so registry and DNS panels show UNKNOWN.</p>
+      <div class="gallery">
+        <figure><a href="screenshots/overview.png"><img src="screenshots/overview.png" alt="NardTrace overview page" loading="lazy" width="1440" height="1000"></a><figcaption>Overview</figcaption></figure>
+        <figure><a href="screenshots/url-analyzer.png"><img src="screenshots/url-analyzer.png" alt="URL analyzer decoding nested Safe Links and Google redirects" loading="lazy" width="1440" height="1000"></a><figcaption>URL Analyzer: nested wrappers decoded without visiting</figcaption></figure>
+        <figure><a href="screenshots/file-hash.png"><img src="screenshots/file-hash.png" alt="File analysis flagging an executable disguised as a PDF" loading="lazy" width="1440" height="1000"></a><figcaption>File &amp; Hash: an executable named .pdf.exe</figcaption></figure>
+        <figure><a href="screenshots/ip-intel.png"><img src="screenshots/ip-intel.png" alt="IP intelligence page" loading="lazy" width="1440" height="1000"></a><figcaption>IP Intelligence</figcaption></figure>
+      </div>
+      <p class="sub" style="margin-top:16px"><a href="screenshots/email-analyzer.png">Full Email Analyzer result →</a></p>
+    </section>
+
+    <section id="rules">
+      <h2>Ground rules</h2>
+      <ul class="rules">
+        <li>An IP address identifies a network, never a person or a home address. Location is always labelled approximate.</li>
+        <li>NardTrace never visits suspicious links, opens attachments, or scans anyone's servers.</li>
+        <li>Your evidence stays on your machine. API keys come only from environment variables.</li>
+        <li>It is for investigating messages you received, and for reporting them to people who can act lawfully. It is not for unmasking or confronting individuals.</li>
+      </ul>
+    </section>
+
+    <section id="run">
+      <h2>Run it</h2>
+      <p class="sub">GitHub Pages can't run NardTrace itself, because the analyzers need a server. Run it on your own computer:</p>
+      <pre>git clone https://github.com/thankcheeses/NardTrace.git
+cd NardTrace
+docker compose up --build
+# then open http://localhost:8000 and click “Load demo case”</pre>
+    </section>
+
+    <footer>
+      © Brianna Baynard · NardTrace is a portfolio project ·
+      <a href="https://github.com/thankcheeses/NardTrace">Source on GitHub</a>
+    </footer>
+  </div>
+</body>
+</html>
