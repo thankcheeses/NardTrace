@@ -4,6 +4,7 @@ import { useCases } from '../CaseContext'
 import { CaseTarget } from '../components/CaseTarget'
 import { FindingsList } from '../components/Findings'
 import { AbuseContacts, IPSummary } from '../components/Intel'
+import { ScamPanel } from '../components/ScamPanel'
 import { Trace } from '../components/Trace'
 import { Verdict, collectAll } from '../components/Verdict'
 import { authTone, Collapsible, CopyButton, ErrorBox, KV, PageHeader, Pill, Section, Spinner } from '../components/ui'
@@ -86,6 +87,7 @@ export function EmailResult({ r }) {
           <p className="mt-3 text-xs text-[#5B6A86]">Major webmail providers strip the sender's device IP, so "not present" is normal. When present, these IPs identify a network, possibly a VPN or carrier, never a person.</p>
         </Section>
       </div>
+      <ScamPanel r={r} />
       {r.handoff_ip_intel && <div><div className="eyebrow mb-3">Hand-off server intelligence</div><IPSummary r={r.handoff_ip_intel} /></div>}
       <div className="grid gap-4 lg:grid-cols-2">
         <Section eyebrow="Not opened" title={`Links (${r.links.length})`}>

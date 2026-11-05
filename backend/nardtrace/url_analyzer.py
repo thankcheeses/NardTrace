@@ -14,6 +14,7 @@ from .lookalike import decode_idn
 from .lookups import dns_query
 from .netutil import defang, parse_ip, refang, registered_domain
 from .reputation import safebrowsing_url, virustotal_url
+from .scam_signals import website_heuristics
 
 MODULE = "url"
 
@@ -150,6 +151,8 @@ def heuristics(p: dict[str, Any]) -> list[Finding]:
     if len(p["url"]) > 200:
         add("Very long URL", f"{len(p['url'])} characters.",
             "Long URLs can hide the real destination or carry tracking/victim identifiers.", Severity.INFO)
+    for w in website_heuristics(p):
+        add(w["title"], w["what"], w["meaning"], Severity(w["severity"]))
     return out
 
 

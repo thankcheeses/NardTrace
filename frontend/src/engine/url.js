@@ -4,6 +4,7 @@ import { Confidence, Severity, Status, finding } from './findings.js'
 import { analyzeIp } from './ip.js'
 import { dnsQuery } from './lookups.js'
 import { decodeIdn, defang, parseIp, refang, registeredDomain } from './net.js'
+import { websiteHeuristics } from './scamsignals.js'
 
 const MODULE = 'url'
 const SHORTENERS = new Set(['bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd', 'buff.ly', 'rebrand.ly', 'cutt.ly', 'shorturl.at', 'rb.gy', 'tiny.cc', 's.id', 't.ly', 'lnkd.in', 'bl.ink'])
@@ -100,6 +101,7 @@ export function heuristics(p) {
   if ((host.match(/\./g) || []).length >= 4 && !p.is_ip_host) add('Deeply nested subdomains', host,
     `Long chains of subdomains are used to push a brand name to the front of a link while the real domain is ${p.registered_domain}.`, Severity.MEDIUM)
   if (p.url.length > 200) add('Very long URL', `${p.url.length} characters.`, 'Long URLs can hide the real destination or carry tracking/victim identifiers.', Severity.INFO)
+  for (const w of websiteHeuristics(p)) add(w.title, w.what, w.meaning, w.severity)
   return out
 }
 

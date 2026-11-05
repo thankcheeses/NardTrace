@@ -1,0 +1,35 @@
+Delivered-To: recipient@example.net
+Received: by 2002:a05:6504:1d85:b0:320:493a:3077 with SMTP id o5csp184741ltz; Wed, 4 Nov 2026 12:17:37 -0800 (PST)
+Authentication-Results: mx.google.com; arc=pass (i=1 spf=pass spfdomain=staffing-vendor.example dkim=pass dkdomain=staffing-vendor.example dmarc=pass fromdomain=staffing-vendor.example); spf=pass (google.com: domain of recruiter@staffing-vendor.example designates 2a01:111:f403:c107::9 as permitted sender) smtp.mailfrom=recruiter@staffing-vendor.example
+Return-Path: <recruiter@staffing-vendor.example>
+Received: from PH7PR06CU001.outbound.protection.outlook.com (mail-westus3azlp170100009.outbound.protection.outlook.com. [2a01:111:f403:c107::9]) by mx.google.com with ESMTPS id d2e1a72fcca58-8b095e9da47si6880421b3a.34.2026.11.04.12.17.36 (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256); Wed, 04 Nov 2026 12:17:37 -0800 (PST)
+Received-SPF: pass (google.com: domain of recruiter@staffing-vendor.example designates 2a01:111:f403:c107::9 as permitted sender) client-ip=2a01:111:f403:c107::9;
+Received: from DM4PR14MB6427.namprd14.prod.outlook.com (2603:10b6:8:100::9) by BY5PR14MB3447.namprd14.prod.outlook.com (2603:10b6:a03:1ec::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.592.10; Wed, 4 Nov 2026 20:17:29 +0000
+From: Sample Recruiter <recruiter@staffing-vendor.example>
+To: Sample Recruiter <recruiter@staffing-vendor.example>
+Subject: 811673_Network Operations Specialist *3rd Shift* at Harrisburg, PA
+Date: Wed, 4 Nov 2026 20:17:29 +0000
+Message-ID: <DM4PR14MB6427SYNTHETIC@DM4PR14MB6427.namprd14.prod.outlook.com>
+References: <SYNTHETIC-1@example.net> <SYNTHETIC-2@example.net> <SYNTHETIC-3@example.net>
+In-Reply-To: <SYNTHETIC-3@example.net>
+X-OriginatorOrg: staffing-vendor.example
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+
+Hi,
+
+Please find below the Job description and let me know if you are interested.
+
+Title/Role: Network Operations Specialist *3rd Shift*
+Client: State agency
+Contract Position
+Max Submittals by Vendor: 1 Per Opening
+C2C rate - $30.00, 1099 - $29.00, W2 Standard Benefits - $26.00
+
+Question 3
+Vendor rate is , do you accept?
+
+Best Regards,
+Sample Recruiter
+Staffing Vendor | Team Lead
+M: +1 555-010-0199

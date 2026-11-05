@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useCases } from '../CaseContext'
 import { FindingsList } from '../components/Findings'
+import { ReportPanel } from '../components/ReportPanel'
 import { DomainSummary, IPSummary } from '../components/Intel'
 import { EvidenceBar, collectAll } from '../components/Verdict'
 import { Collapsible, CopyButton, ErrorBox, PageHeader, Pill, Section, Spinner } from '../components/ui'
@@ -57,6 +58,7 @@ export default function CaseDetail() {
         </Section>
         <Section eyebrow={`${allFindings.length} findings`} title="Evidence mix"><EvidenceBar findings={allFindings} /><p className="mt-3 text-xs text-[#5B6A86]">{allFindings.filter((f) => f.severity === 'high').length} high-severity. Confirmed and external-intel findings carry the report; assumptions are flagged as such.</p></Section>
       </div>
+      <div className="mb-6"><ReportPanel data={data} abuse={abuse} onGenerate={genAbuse} /></div>
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <Section eyebrow="Chain of custody" title={`Evidence (${data.evidence.length})`}>
           {data.evidence.length ? <ul className="space-y-2">{data.evidence.map((e) => (
