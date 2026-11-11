@@ -1,0 +1,8 @@
+{
+  "appId": "com.nardtrace.app",
+  "appName": "NardTrace",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}
