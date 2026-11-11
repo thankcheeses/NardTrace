@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NardTrace privacy policy</title>
+  <meta name="description" content="What NardTrace does and does not do with your data, in the browser, Android and server editions.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root { --bg: #020617; --panel: #0f172a; --line: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: var(--accent); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 64px; }
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 600; font-size: 18px; }
+    .brand img { width: 32px; height: 32px; }
+    h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 24px 0 8px; color: #fff; letter-spacing: -0.02em; }
+    h2 { font-size: 20px; color: #fff; margin: 36px 0 8px; }
+    .meta { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+    .note { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; color: var(--muted); font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    ul { padding-left: 20px; }
+    li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="./"><img src="favicon.svg" alt="">NardTrace</a>
+    </header>
+
+    <h1>Privacy policy</h1>
+    <p class="meta">Effective 11 November 2026 · Applies to the NardTrace web app, the NardTrace Android app, and the self-hosted server edition.</p>
+
+    <p>NardTrace is an email and infrastructure investigation tool. Its design rule is simple: <strong>your evidence stays on your device.</strong> This page says exactly what leaves it, when, and to whom.</p>
+
+    <h2>What NardTrace does not do</h2>
+    <ul>
+      <li>No account, sign-in, or user profile.</li>
+      <li>No analytics, tracking pixels, advertising identifiers, or crash reporting.</li>
+      <li>No upload of your emails, attachments, files, notes or case reports to any server operated by NardTrace or its author.</li>
+      <li>No visiting of suspicious links and no opening or running of attachments. Link decoding is done on the text of the link alone.</li>
+      <li>No selling or sharing of personal data with third parties.</li>
+    </ul>
+
+    <h2>Where your data is stored</h2>
+    <p>In the web app and the Android app, everything you analyse and every case you create is stored only in the app's local storage on your device (the browser's IndexedDB). Clearing the site data in your browser, or uninstalling the Android app, deletes it. There is no copy anywhere else.</p>
+    <p>In the server edition, which you run yourself with Docker, data is stored in a SQLite database and an evidence folder on the machine you run it on. The author of NardTrace has no access to that machine.</p>
+
+    <h2>What leaves your device, and why</h2>
+    <p>Lookups are optional and can be switched off with the "Lookups" toggle. When they are on, NardTrace sends <em>only the indicator being checked</em> (a domain name, an IP address, or a file hash), never the email or file itself, to these read-only public services:</p>
+    <table>
+      <tr><th>Service</th><th>What is sent</th><th>Why</th></tr>
+      <tr><td>Cloudflare DNS over HTTPS (1.1.1.1), with Google Public DNS as fallback</td><td>Domain names from the message</td><td>SPF, DMARC, MX and address records</td></tr>
+      <tr><td>rdap.org (registry data access protocol)</td><td>IP addresses and domain names</td><td>Who operates a network or registered a domain, and their abuse contact</td></tr>
+      <tr><td>ipinfo.io</td><td>IP addresses</td><td>Network operator and approximate, city-level location. Never a street address or a person.</td></tr>
+    </table>
+    <p>Each of these services sees your device's IP address as part of the ordinary network request, as any website does, and each has its own privacy policy. The server edition can additionally be configured by its operator with API keys for AbuseIPDB and VirusTotal; when set, hashes, IP addresses and URLs are sent to those services, and the operator's own keys and accounts apply.</p>
+
+    <h2>Fonts</h2>
+    <p>The web app loads its typefaces from Google Fonts. The Android app bundles no network fonts beyond that same request. If Google Fonts is unreachable, system fonts are used.</p>
+
+    <h2>Reports you choose to send</h2>
+    <p>The "Report" panel prepares a copy-ready abuse email and offers links to reporting forms run by the FTC, the FBI's IC3, Google Safe Browsing, Microsoft and the APWG. Nothing is sent until you press send in your own email client or submit one of those forms yourself. What you send, and to whom, is your decision, and those organisations' privacy policies then apply.</p>
+
+    <h2>Permissions (Android app)</h2>
+    <p>The Android app requests only the Internet permission, for the lookups above. It does not request access to your contacts, location, camera, microphone, SMS, or your mailbox. Files you analyse are the ones you pick with the system file picker.</p>
+
+    <h2>Children</h2>
+    <p>NardTrace is not directed at children under 13 and collects no personal data from anyone.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the new version will be published at this address with a new effective date. The source of this page and of the app is public at <a href="https://github.com/thankcheeses/NardTrace">github.com/thankcheeses/NardTrace</a>, so any change is visible in the repository history.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about privacy can be raised by opening an issue at <a href="https://github.com/thankcheeses/NardTrace/issues">github.com/thankcheeses/NardTrace/issues</a>.</p>
+
+    <p class="note">NardTrace is written and maintained by Brianna Baynard. It is provided as-is for investigating messages you received and reporting them to people who can act lawfully.</p>
+  </div>
+</body>
+</html>

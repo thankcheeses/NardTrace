@@ -1,0 +1,46 @@
+name: Android APK
+
+# Builds the Capacitor Android shell around the browser edition and publishes a
+# debug APK as a workflow artifact. Release signing (keystore secrets) comes later.
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", ".github/workflows/android.yml"]
+  pull_request:
+    paths: ["frontend/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      # ubuntu-latest ships the Android SDK at $ANDROID_HOME; Gradle fetches the
+      # exact platform/build-tools it needs once the licences are accepted.
+      - name: Accept Android SDK licences
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - run: npm run build:app
+      - run: npx cap sync android
+      - run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+        working-directory: frontend/android
+      - name: Report APK
+        run: ls -la android/app/build/outputs/apk/debug/ && du -h android/app/build/outputs/apk/debug/*.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nardtrace-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
