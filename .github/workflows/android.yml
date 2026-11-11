@@ -27,7 +27,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest ships the Android SDK at $ANDROID_HOME; Gradle fetches the
+      # exact platform/build-tools it needs once the licences are accepted.
+      - name: Accept Android SDK licences
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
       - run: npm ci
       - run: npm run build:app
