@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NardTrace</string>
+    <string name="title_activity_main">NardTrace</string>
+    <string name="package_name">com.nardtrace.app</string>
+    <string name="custom_url_scheme">com.nardtrace.app</string>
+</resources>

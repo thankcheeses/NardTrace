@@ -55,6 +55,8 @@ What was found · where the evidence came from · what it means in plain English
 | PDF report | Browser print → Save as PDF | WeasyPrint, server-rendered |
 | Start | Open the link above | `docker compose up --build` |
 
+The web edition also ships as a native shell: `frontend/android/` is a [Capacitor](https://capacitorjs.com) project that packages the on-device build (`npm run build:app`) as an Android app with the same engine, storage and privacy model as the browser. The `Android APK` workflow builds a debug APK on every push and attaches it to the run as an artifact; `frontend/assets/icon.png` is the launcher-icon source. See `docs/research/app-store-publishing.md` for the Play Store and App Store path, and `site/privacy.html` for the policy both stores require.
+
 The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 19 engine tests; `pytest` runs 47 backend tests).
 
 ## Quick start
