@@ -55,9 +55,9 @@ What was found · where the evidence came from · what it means in plain English
 | PDF report | Browser print → Save as PDF | WeasyPrint, server-rendered |
 | Start | Open the link above | `docker compose up --build` |
 
-The web edition also ships as a native shell: `frontend/android/` is a [Capacitor](https://capacitorjs.com) project that packages the on-device build (`npm run build:app`) as an Android app with the same engine, storage and privacy model as the browser. The `Android APK` workflow builds a debug APK on every push and attaches it to the run as an artifact; `frontend/assets/icon.png` is the launcher-icon source. See `docs/research/app-store-publishing.md` for the Play Store and App Store path, and `site/privacy.html` for the policy both stores require.
+The web edition also ships as a native shell: `frontend/android/` is a [Capacitor](https://capacitorjs.com) project that packages the on-device build (`npm run build:app`) as an Android app with the same engine, storage and privacy model as the browser. The `Android APK` workflow builds a debug APK on every push to `main` that touches `frontend/` and attaches it to the run as an artifact; `frontend/assets/icon.png` is the launcher-icon source. See `docs/research/app-store-publishing.md` for the Play Store and App Store path, and `site/privacy.html` for the policy both stores require.
 
-The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 19 engine tests; `pytest` runs 47 backend tests).
+The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 26 engine tests; `pytest` runs 54 backend tests).
 
 ## Quick start
 
@@ -97,7 +97,7 @@ Or run `npm run build` once; the backend then serves `frontend/dist` at http://l
 cd backend && python -m pytest
 ```
 
-The suite (47 tests) runs fully offline against **synthetic** `.eml` fixtures in `backend/tests/fixtures/`, which
+The suite (54 tests) runs fully offline against **synthetic** `.eml` fixtures in `backend/tests/fixtures/`, which
 contain no real personal data. CI (`.github/workflows/ci.yml`) runs the tests, builds the frontend, builds the Docker
 image, and smoke-tests it by generating a PDF report.
 
@@ -189,7 +189,6 @@ Dockerfile           multi-stage (Node build → Python slim)  docker-compose.ym
 |---|---|
 | ![Overview](docs/screenshots/overview.png) | ![Case](docs/screenshots/case.png) |
 | ![URL analyzer](docs/screenshots/url-analyzer.png) | ![File & hash](docs/screenshots/file-hash.png) |
-
 | ![Email verdict](docs/screenshots/email-verdict.png) | ![IP intel](docs/screenshots/ip-intel.png) |
 
 *Screenshots were captured in a sandbox with no outbound network, so RDAP, DNS and geolocation show as UNKNOWN. That is
@@ -232,4 +231,4 @@ https://www.ic3.gov.
 
 ---
 
-© Brianna Baynard. NardTrace is a portfolio project.
+© Brianna Baynard · [LinkedIn](https://www.linkedin.com/in/brianna-baynard) · [GitHub](https://github.com/thankcheeses). NardTrace is a portfolio project.

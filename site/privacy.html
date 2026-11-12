@@ -51,7 +51,7 @@
     <p>In the server edition, which you run yourself with Docker, data is stored in a SQLite database and an evidence folder on the machine you run it on. The author of NardTrace has no access to that machine.</p>
 
     <h2>What leaves your device, and why</h2>
-    <p>Lookups are optional and can be switched off with the "Lookups" toggle. When they are on, NardTrace sends <em>only the indicator being checked</em> (a domain name, an IP address, or a file hash), never the email or file itself, to these read-only public services:</p>
+    <p>Lookups are optional and can be switched off with the "Live lookups" toggle. When they are on, NardTrace sends <em>only the indicator being checked</em> (a domain name, an IP address, or a file hash), never the email or file itself, to these read-only public services:</p>
     <table>
       <tr><th>Service</th><th>What is sent</th><th>Why</th></tr>
       <tr><td>Cloudflare DNS over HTTPS (1.1.1.1), with Google Public DNS as fallback</td><td>Domain names from the message</td><td>SPF, DMARC, MX and address records</td></tr>
