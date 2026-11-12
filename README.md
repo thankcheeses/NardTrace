@@ -231,4 +231,4 @@ https://www.ic3.gov.
 
 ---
 
-© Brianna Baynard · [LinkedIn](https://www.linkedin.com/in/brianna-baynard) · [GitHub](https://github.com/thankcheeses). NardTrace is a portfolio project.
+© Brianna Baynard · [LinkedIn](https://www.linkedin.com/in/brianna-baynard) · [GitHub](https://github.com/thankcheeses). NardTrace is a portfolio project, released under the [MIT License](LICENSE).
