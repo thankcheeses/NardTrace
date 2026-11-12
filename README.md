@@ -10,7 +10,7 @@ NardTrace is **not** a one-off phishing checker, and it is **not** a tool for id
 individuals. It identifies *infrastructure* (mail servers, networks, registrars) and the people responsible for
 stopping abuse on it.
 
-**Use it now:** https://thankcheeses.github.io/NardTrace/app/ — the web edition runs entirely in your browser. Your email never leaves your device; only read-only DNS and registry lookups go out. Project page with a sample report: https://thankcheeses.github.io/NardTrace/
+**Use it now:** https://thankcheeses.github.io/NardTrace/app/ — the web edition runs entirely in your browser. Your email never leaves your device. The only outbound traffic is read-only lookups of the indicator being checked: DNS-over-HTTPS (Cloudflare, Google), RDAP registry data (rdap.org) and approximate IP geolocation (ipinfo.io). Fonts are bundled with the app, and **Live lookups** can be switched off. Project page with a sample report: https://thankcheeses.github.io/NardTrace/
 
 ![Email analyzer](docs/screenshots/email-analyzer.png)
 
@@ -28,7 +28,7 @@ stopping abuse on it.
 | **Scam-pattern classifier** | Reads the wording of a message against templates drawn from FTC job-scam guidance, CISA/APWG phishing indicators and IC3 BEC reporting: urgency, account-threat lures, credential/identity requests, unusual payment methods, BEC, employment scams, bulk staffing mailings, advance-fee, tech-support callbacks, sextortion, delivery lures, investment and government impersonation. Adds structural signals (BCC blasts, thread reuse, phone-only calls to action, hidden text, image-only bodies, QR codes) and reports a "reads like …" verdict, always tagged ASSUMPTION. |
 | **Fake-website signals** | Free/shared hosting under a trusted parent domain, form builders and file-sharing links used as login pages, brand names inside unrelated URLs, login-style paths on untrusted hosts, keyword-stuffed or digit-heavy domains, victim address embedded in the link, script/data URLs. |
 | **Report this** | One panel per case: the abuse desks found by RDAP, the sending provider's channels, and buttons that open your mail app or the official forms (FTC, IC3, Google Safe Browsing, Microsoft, APWG) with the summary already written. Nothing is sent automatically. |
-| **Cases & Reports** | Cases collect analyses, notes and uploaded evidence. Every artifact is stored by SHA-256, with an append-only **chain-of-custody log** and one-click integrity re-verification. Exports **PDF and Markdown** reports, optionally **redacted**, plus a **copy-ready abuse email** addressed to the contacts found. |
+| **Cases & Reports** | Cases collect analyses, notes and uploaded evidence. Every artifact is stored by SHA-256, with an append-only **chain-of-custody log** and one-click integrity re-verification. The log is a record the app only ever adds to; it is not cryptographically sealed. In the web edition it lives in your browser's own storage, and in the server edition in a SQLite file, so anyone with access to that storage could alter it. Treat it as a working record, not tamper-proof proof. Exports **PDF and Markdown** reports, optionally **redacted**, plus a **copy-ready abuse email** addressed to the contacts found. |
 
 ### Every finding answers six questions
 
@@ -55,15 +55,15 @@ What was found · where the evidence came from · what it means in plain English
 | PDF report | Browser print → Save as PDF | WeasyPrint, server-rendered |
 | Start | Open the link above | `docker compose up --build` |
 
-The web edition also ships as a native shell: `frontend/android/` is a [Capacitor](https://capacitorjs.com) project that packages the on-device build (`npm run build:app`) as an Android app with the same engine, storage and privacy model as the browser. The `Android APK` workflow builds a debug APK on every push and attaches it to the run as an artifact; `frontend/assets/icon.png` is the launcher-icon source. See `docs/research/app-store-publishing.md` for the Play Store and App Store path, and `site/privacy.html` for the policy both stores require.
+The web edition also ships as a native shell: `frontend/android/` is a [Capacitor](https://capacitorjs.com) project that packages the on-device build (`npm run build:app`) as an Android app with the same engine, storage and privacy model as the browser. The `Android APK` workflow builds a debug APK on every push to `main` that touches `frontend/` and attaches it to the run as an artifact; `frontend/assets/icon.png` is the launcher-icon source. See `docs/research/app-store-publishing.md` for the Play Store and App Store path, and `site/privacy.html` for the policy both stores require.
 
-The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 19 engine tests; `pytest` runs 47 backend tests).
+The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 26 engine tests; `pytest` runs 54 backend tests).
 
 ## Quick start
 
 ### Web edition (nothing to install)
 
-Open **https://thankcheeses.github.io/NardTrace/app/**, click **Load demo case**, or paste anything suspicious into the desk. Turn **Live lookups** off in the sidebar if you want a fully offline run.
+Open **https://thankcheeses.github.io/NardTrace/app/**, click **Load demo case**, or paste anything suspicious into the desk. Turn **Live lookups** off (sidebar on desktop, top bar on a phone) if you want a fully offline run.
 
 ### Docker (server edition)
 
@@ -97,7 +97,7 @@ Or run `npm run build` once; the backend then serves `frontend/dist` at http://l
 cd backend && python -m pytest
 ```
 
-The suite (47 tests) runs fully offline against **synthetic** `.eml` fixtures in `backend/tests/fixtures/`, which
+The suite (54 tests) runs fully offline against **synthetic** `.eml` fixtures in `backend/tests/fixtures/`, which
 contain no real personal data. CI (`.github/workflows/ci.yml`) runs the tests, builds the frontend, builds the Docker
 image, and smoke-tests it by generating a PDF report.
 
@@ -189,7 +189,6 @@ Dockerfile           multi-stage (Node build → Python slim)  docker-compose.ym
 |---|---|
 | ![Overview](docs/screenshots/overview.png) | ![Case](docs/screenshots/case.png) |
 | ![URL analyzer](docs/screenshots/url-analyzer.png) | ![File & hash](docs/screenshots/file-hash.png) |
-
 | ![Email verdict](docs/screenshots/email-verdict.png) | ![IP intel](docs/screenshots/ip-intel.png) |
 
 *Screenshots were captured in a sandbox with no outbound network, so RDAP, DNS and geolocation show as UNKNOWN. That is
@@ -232,4 +231,4 @@ https://www.ic3.gov.
 
 ---
 
-© Brianna Baynard. NardTrace is a portfolio project.
+© Brianna Baynard · [LinkedIn](https://www.linkedin.com/in/brianna-baynard) · [GitHub](https://github.com/thankcheeses). NardTrace is a portfolio project.
