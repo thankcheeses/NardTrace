@@ -10,7 +10,7 @@ NardTrace is **not** a one-off phishing checker, and it is **not** a tool for id
 individuals. It identifies *infrastructure* (mail servers, networks, registrars) and the people responsible for
 stopping abuse on it.
 
-**Use it now:** https://thankcheeses.github.io/NardTrace/app/ — the web edition runs entirely in your browser. Your email never leaves your device; only read-only DNS and registry lookups go out. Project page with a sample report: https://thankcheeses.github.io/NardTrace/
+**Use it now:** https://thankcheeses.github.io/NardTrace/app/ — the web edition runs entirely in your browser. Your email never leaves your device. The only outbound traffic is read-only lookups of the indicator being checked: DNS-over-HTTPS (Cloudflare, Google), RDAP registry data (rdap.org) and approximate IP geolocation (ipinfo.io). Fonts are bundled with the app, and **Live lookups** can be switched off. Project page with a sample report: https://thankcheeses.github.io/NardTrace/
 
 ![Email analyzer](docs/screenshots/email-analyzer.png)
 
@@ -28,7 +28,7 @@ stopping abuse on it.
 | **Scam-pattern classifier** | Reads the wording of a message against templates drawn from FTC job-scam guidance, CISA/APWG phishing indicators and IC3 BEC reporting: urgency, account-threat lures, credential/identity requests, unusual payment methods, BEC, employment scams, bulk staffing mailings, advance-fee, tech-support callbacks, sextortion, delivery lures, investment and government impersonation. Adds structural signals (BCC blasts, thread reuse, phone-only calls to action, hidden text, image-only bodies, QR codes) and reports a "reads like …" verdict, always tagged ASSUMPTION. |
 | **Fake-website signals** | Free/shared hosting under a trusted parent domain, form builders and file-sharing links used as login pages, brand names inside unrelated URLs, login-style paths on untrusted hosts, keyword-stuffed or digit-heavy domains, victim address embedded in the link, script/data URLs. |
 | **Report this** | One panel per case: the abuse desks found by RDAP, the sending provider's channels, and buttons that open your mail app or the official forms (FTC, IC3, Google Safe Browsing, Microsoft, APWG) with the summary already written. Nothing is sent automatically. |
-| **Cases & Reports** | Cases collect analyses, notes and uploaded evidence. Every artifact is stored by SHA-256, with an append-only **chain-of-custody log** and one-click integrity re-verification. Exports **PDF and Markdown** reports, optionally **redacted**, plus a **copy-ready abuse email** addressed to the contacts found. |
+| **Cases & Reports** | Cases collect analyses, notes and uploaded evidence. Every artifact is stored by SHA-256, with an append-only **chain-of-custody log** and one-click integrity re-verification. The log is a record the app only ever adds to; it is not cryptographically sealed. In the web edition it lives in your browser's own storage, and in the server edition in a SQLite file, so anyone with access to that storage could alter it. Treat it as a working record, not tamper-proof proof. Exports **PDF and Markdown** reports, optionally **redacted**, plus a **copy-ready abuse email** addressed to the contacts found. |
 
 ### Every finding answers six questions
 
@@ -63,7 +63,7 @@ The same React interface drives both. On load it probes `/api/health`; if the ba
 
 ### Web edition (nothing to install)
 
-Open **https://thankcheeses.github.io/NardTrace/app/**, click **Load demo case**, or paste anything suspicious into the desk. Turn **Live lookups** off in the sidebar if you want a fully offline run.
+Open **https://thankcheeses.github.io/NardTrace/app/**, click **Load demo case**, or paste anything suspicious into the desk. Turn **Live lookups** off (sidebar on desktop, top bar on a phone) if you want a fully offline run.
 
 ### Docker (server edition)
 

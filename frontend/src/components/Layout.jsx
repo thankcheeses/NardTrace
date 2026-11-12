@@ -29,6 +29,12 @@ export default function Layout() {
         <nav className="flex gap-1 overflow-x-auto px-3 pb-2">
           {NAV.map(([to, label]) => <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `shrink-0 rounded-full px-3 py-1 text-xs ${isActive ? 'bg-trace/15 text-trace' : 'text-[#8392AE] hover:text-[#E6EDF7]'}`}>{label}</NavLink>)}
         </nav>
+        {browser && config && (
+          <label className="flex cursor-pointer items-center justify-between gap-3 border-t border-line px-4 py-2 text-xs text-[#B4C0D6]">
+            <span>Live lookups (DNS, RDAP, geo) · {config.offline ? <span className="text-assume">off</span> : <span className="text-confirmed">on</span>}</span>
+            <input type="checkbox" className="h-4 w-4 accent-cyan-400" checked={!config.offline} onChange={(e) => setLookups(e.target.checked)} />
+          </label>
+        )}
       </header>
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line bg-ink-900/70 backdrop-blur lg:flex">
         <div className="flex items-center gap-3 px-5 py-5">

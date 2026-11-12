@@ -120,7 +120,7 @@
       <h1>Turn a suspicious email into an <span>evidence report</span>.</h1>
       <p class="say">Say it <b>“nerd-trace.”</b> The name plays on Baynard.</p>
       <p class="lede">NardTrace is an email and infrastructure investigation workbench. Investigate an email, IP address, domain, URL or file hash, and get a report you can send to a provider, a platform, or law enforcement. Every finding says how it is known and what it does <em>not</em> prove.</p>
-      <p class="say">The web edition runs entirely in your browser: your email never leaves your device. Only read-only DNS and registry lookups go out.</p>
+      <p class="say">The web edition runs entirely in your browser: your email never leaves your device. The only outbound traffic is read-only DNS, registry (RDAP) and approximate IP-geolocation (ipinfo.io) lookups of the indicator being checked, and you can switch those off.</p>
       <div class="cta">
         <a class="btn primary" href="app/">Open NardTrace</a>
         <a class="btn ghost" href="demo/">See a sample report</a>
@@ -137,7 +137,7 @@
         <div class="card"><svg class="card-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><h3>Domain Intelligence</h3><p>DNS records, SPF and DMARC policy, registrar and abuse contact, domain-age warnings, lookalike detection.</p></div>
         <div class="card"><svg class="card-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg><h3>URL Analyzer</h3><p>Defangs links and decodes Safe Links, Proofpoint and redirect wrappers from the URL text. It never visits the link.</p></div>
         <div class="card"><svg class="card-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6"/></svg><h3>File &amp; Hash</h3><p>MD5, SHA-1 and SHA-256, plus the file's real type from its first bytes. Nothing is opened or run.</p></div>
-        <div class="card"><svg class="card-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h6l2 2h8v11H4z"/></svg><h3>Cases &amp; Reports</h3><p>PDF and Markdown reports (with a redacted option), a chain-of-custody log, and a copy-ready abuse email for the contacts found.</p></div>
+        <div class="card"><svg class="card-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h6l2 2h8v11H4z"/></svg><h3>Cases &amp; Reports</h3><p>PDF and Markdown reports (with a redacted option), a chain-of-custody log (a working record, not tamper-proof), and a copy-ready abuse email for the contacts found.</p></div>
       </div>
     </section>
 
@@ -243,7 +243,10 @@ docker compose up --build
     </section>
 
     <footer>
-      © Brianna Baynard · NardTrace is a portfolio project ·
+      © Brianna Baynard ·
+      <a href="https://www.linkedin.com/in/brianna-baynard">LinkedIn</a> ·
+      <a href="https://github.com/thankcheeses">GitHub</a> ·
+      NardTrace is a portfolio project ·
       <a href="privacy.html">Privacy policy</a> ·
       <a href="https://github.com/thankcheeses/NardTrace">Source on GitHub</a>
     </footer>

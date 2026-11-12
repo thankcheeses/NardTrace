@@ -43,7 +43,7 @@ export default function Overview() {
   const kind = classify(q)
   return (
     <>
-      <PageHeader eyebrow="Investigation desk" title="What are you looking at?" subtitle="Paste anything suspicious: an IP address, a domain, a link, a file hash, or a block of raw email headers. NardTrace works out what it is and takes it to the right analyzer. Nothing you paste is sent anywhere except read-only DNS and registry lookups.">
+      <PageHeader eyebrow="Investigation desk" title="What are you looking at?" subtitle="Paste anything suspicious: an IP address, a domain, a link, a file hash, or a block of raw email headers. NardTrace works out what it is and takes it to the right analyzer. Nothing you paste is sent anywhere except read-only DNS, registry and IP-geolocation lookups.">
         <button className="btn-ghost" onClick={seed}>Load demo case</button>
       </PageHeader>
       <ErrorBox error={err} />
