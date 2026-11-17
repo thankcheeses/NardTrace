@@ -43,8 +43,8 @@ export function ReportPanel({ data, abuse, onGenerate }) {
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="rounded-xl border border-line bg-ink-950/40 p-3">
           <div className="eyebrow mb-2">1 · Abuse desks found by lookups</div>
-          {contacts.length ? <ul className="mb-3 space-y-1 text-sm">{contacts.map((c) => <li key={c.email} className="flex flex-wrap items-center gap-2"><span className="mono text-emerald-200">{c.email}</span><Pill tone="green">{c.source}</Pill><span className="text-xs text-[#5B6A86]">{c.for.join(', ')}</span></li>)}</ul>
-            : <p className="mb-3 text-sm text-[#5B6A86]">None yet. Run the hand-off IP and sender domain with live lookups on, and the RDAP abuse contacts appear here.</p>}
+          {contacts.length ? <ul className="mb-3 space-y-1 text-sm">{contacts.map((c) => <li key={c.email} className="flex flex-wrap items-center gap-2"><span className="mono text-emerald-200">{c.email}</span><Pill tone="green">{c.source}</Pill><span className="text-xs text-[#7989A8]">{c.for.join(', ')}</span></li>)}</ul>
+            : <p className="mb-3 text-sm text-[#7989A8]">None yet. Run the hand-off IP and sender domain with live lookups on, and the RDAP abuse contacts appear here.</p>}
           {providers.map((p) => <div key={p.name} className="mb-2 text-sm"><span className="text-[#B4C0D6]">{p.name}</span> <Pill tone="amber">assumption</Pill><ul className="mt-1 space-y-0.5 text-xs text-[#8392AE]">{p.report.map((ch, i) => <li key={i}>• {ch.label}{ch.email && <span className="mono text-trace"> {ch.email}</span>}{ch.url && <a className="mono text-trace hover:underline" href={ch.url} target="_blank" rel="noreferrer"> {ch.url}</a>}</li>)}</ul></div>)}
           <div className="flex flex-wrap gap-2">
             {abuse ? <a className="btn-primary" href={mailto(abuseTo.length ? abuseTo : contacts.map((c) => c.email), abuse.subject, body)} onClick={(e) => { if (!abuseTo.length && !contacts.length) { e.preventDefault(); alert('No abuse contact found yet. Run IP / Domain intelligence with lookups on.') } }}>Open abuse email in my mail app</a>
@@ -53,7 +53,7 @@ export function ReportPanel({ data, abuse, onGenerate }) {
         </div>
         <div className="rounded-xl border border-line bg-ink-950/40 p-3">
           <div className="eyebrow mb-2">2 · Official complaint sites</div>
-          <ul className="space-y-2">{dest.map((d) => <li key={d.label}><a className="text-sm text-trace hover:underline" href={d.url} target="_blank" rel="noreferrer">{d.label} ↗</a><div className="text-xs text-[#5B6A86]">{d.note}</div></li>)}</ul>
+          <ul className="space-y-2">{dest.map((d) => <li key={d.label}><a className="text-sm text-trace hover:underline" href={d.url} target="_blank" rel="noreferrer">{d.label} ↗</a><div className="text-xs text-[#7989A8]">{d.note}</div></li>)}</ul>
           <div className="eyebrow mb-1 mt-3">3 · In your mailbox</div>
           <p className="text-xs text-[#8392AE]">Gmail: open the message → ⋮ → <b>Report phishing</b>. Outlook: <b>Report</b> → Report phishing. This trains your provider's filters and is the fastest way to get the sending account reviewed.</p>
         </div>

@@ -1,7 +1,7 @@
 import { KV, Pill, Section } from './ui'
 
 export function AbuseContacts({ contacts = [], empty = 'No abuse contact found.' }) {
-  if (!contacts.length) return <p className="text-sm text-[#5B6A86]">{empty}</p>
+  if (!contacts.length) return <p className="text-sm text-[#7989A8]">{empty}</p>
   return (
     <ul className="space-y-1.5">
       {contacts.map((c, i) => (
@@ -31,7 +31,7 @@ export function IPSummary({ r }) {
         <Section eyebrow="For reporting" title="Abuse contact"><AbuseContacts contacts={r.abuse_contacts || []} empty={r.category !== 'public' ? 'Not applicable to non-public addresses.' : 'No abuse contact found (see findings for errors).'} /></Section>
         <Section eyebrow="Network-level only" title="Approximate location">
           {geo ? <><p className="font-display text-lg text-white">{[geo.city, geo.region, geo.country].filter(Boolean).join(', ')}</p><p className="mt-2 rounded-md border border-assume/40 bg-assume/5 px-3 py-2 text-xs text-amber-100/90">{geo.label}</p></>
-               : <p className="text-sm text-[#5B6A86]">{r.geolocation_error || 'Not available.'}</p>}
+               : <p className="text-sm text-[#7989A8]">{r.geolocation_error || 'Not available.'}</p>}
         </Section>
       </div>
     </div>
@@ -46,7 +46,7 @@ export function DNSTable({ dns }) {
       <tbody>{Object.entries(dns).map(([k, v]) => (
         <tr key={k} className="border-b border-line/60"><td className="td font-medium">{k}</td>
           <td className="td"><Pill tone={v.status === 'ok' ? 'green' : v.status === 'error' ? 'red' : 'slate'}>{v.status}</Pill></td>
-          <td className="td mono">{v.records?.length ? v.records.map((x, i) => <div key={i}>{x}</div>) : <span className="text-[#5B6A86]">{v.error || '—'}</span>}</td></tr>))}
+          <td className="td mono">{v.records?.length ? v.records.map((x, i) => <div key={i}>{x}</div>) : <span className="text-[#7989A8]">{v.error || '—'}</span>}</td></tr>))}
       </tbody></table></div>
   )
 }

@@ -19,12 +19,12 @@ export default function FilePage() {
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <form className="card space-y-3" onSubmit={(e) => { e.preventDefault(); fileA.run() }}>
           <label className="label">File</label>
-          <input type="file" className="block w-full text-sm text-[#B4C0D6] file:mr-3 file:rounded-lg file:border-0 file:bg-ink-700 file:px-3 file:py-2 file:text-[#E6EDF7]" onChange={(e) => setFile(e.target.files[0] || null)} />
+          <input type="file" aria-label="File" className="tap block w-full text-sm text-[#B4C0D6] file:mr-3 file:rounded-lg file:border-0 file:bg-ink-700 file:px-3 file:py-2 file:text-[#E6EDF7]" onChange={(e) => setFile(e.target.files[0] || null)} />
           <button className="btn-primary" disabled={fileA.busy || !file}>Hash & inspect</button><CaseTarget saved={r?.saved_to_case} />
         </form>
         <form className="card space-y-3" onSubmit={(e) => { e.preventDefault(); hashA.run() }}>
           <label className="label">…or a hash (MD5 / SHA-1 / SHA-256)</label>
-          <input className="input font-mono" value={hash} onChange={(e) => setHash(e.target.value)} placeholder="e3b0c442…" />
+          <input className="input font-mono" aria-label="Hash (MD5, SHA-1 or SHA-256)" value={hash} onChange={(e) => setHash(e.target.value)} placeholder="e3b0c442…" />
           <button className="btn-primary" disabled={hashA.busy || !hash.trim()}>Look up</button><CaseTarget saved={hashA.res?.saved_to_case} />
         </form>
       </div>

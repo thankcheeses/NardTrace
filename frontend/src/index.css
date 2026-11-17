@@ -27,7 +27,7 @@
 @layer components {
   .card { @apply rounded-2xl border border-line bg-ink-900/80 p-5 shadow-card backdrop-blur-sm; }
   .card-tight { @apply rounded-xl border border-line bg-ink-900/80 p-4; }
-  .input { @apply w-full rounded-lg border border-line bg-ink-950/80 px-3 py-2 text-sm text-[#E6EDF7] placeholder-[#5B6A86] transition focus:border-trace/60 focus:outline-none focus:ring-2 focus:ring-trace/25; }
+  .input { @apply w-full rounded-lg border border-line bg-ink-950/80 px-3 py-2 text-sm text-[#E6EDF7] placeholder-[#7989A8] transition focus:border-trace/60 focus:outline-none focus:ring-2 focus:ring-trace/25; }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40; }
   .btn-primary { @apply btn bg-trace text-ink-950 hover:bg-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.25)]; }
   .btn-ghost { @apply btn border border-line-strong text-[#E6EDF7] hover:bg-ink-800 hover:border-[#3A4F74]; }
@@ -39,6 +39,15 @@
   .td { @apply px-3 py-2 align-top text-sm; }
   .h1 { @apply font-display text-[24px] sm:text-[28px] font-semibold leading-tight tracking-[-0.01em] text-white; }
   .h2 { @apply font-display text-base font-semibold tracking-wide text-[#E6EDF7]; }
+}
+
+/* Touch screens and the phone/tablet layout (below lg): every control reaches the 44px
+   minimum tap target. `.tap` is for the small text buttons, filter chips and checkbox
+   rows that are not .btn or .input. */
+@media (pointer: coarse), (max-width: 1023px) {
+  .btn, .btn-primary, .btn-ghost, .btn-danger, .input:not(textarea), .tap { min-height: 44px; }
+  :is(a, button).tap { display: inline-flex; align-items: center; }
+  .tap-x { min-width: 44px; justify-content: center; }
 }
 
 @keyframes pulse-ring { 0% { transform: scale(.85); opacity: .9 } 100% { transform: scale(1.9); opacity: 0 } }
