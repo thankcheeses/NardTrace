@@ -28,13 +28,13 @@ export default function EmailPage() {
           <label onDragOver={(e) => { e.preventDefault(); setDrag(true) }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]) }}
             className={`flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center text-sm transition ${drag ? 'border-trace bg-trace/5' : 'border-line-strong hover:border-[#3A4F74]'}`}>
             <input type="file" accept=".eml,.txt,message/rfc822" className="hidden" onChange={(e) => setFile(e.target.files[0] || null)} />
-            {file ? <><span className="font-medium text-[#E6EDF7]">{file.name}</span><span className="text-[#5B6A86]">{file.size} bytes · click to change</span></> : <><span className="text-[#B4C0D6]">Drop an .eml file here</span><span className="text-[#5B6A86]">or click to choose</span></>}
+            {file ? <><span className="font-medium text-[#E6EDF7]">{file.name}</span><span className="text-[#7989A8]">{file.size} bytes · click to change</span></> : <><span className="text-[#B4C0D6]">Drop an .eml file here</span><span className="text-[#7989A8]">or click to choose</span></>}
           </label>
-          <div><label className="label">…or paste raw headers</label><textarea className="input h-40 font-mono text-xs" value={raw} disabled={!!file} onChange={(e) => setRaw(e.target.value)} placeholder={'Delivered-To: …\nReceived: from …\nAuthentication-Results: …'} /></div>
+          <div><label className="label">…or paste raw headers</label><textarea className="input h-40 font-mono text-xs" aria-label="Raw headers" value={raw} disabled={!!file} onChange={(e) => setRaw(e.target.value)} placeholder={'Delivered-To: …\nReceived: from …\nAuthentication-Results: …'} /></div>
         </div>
         <div className="flex flex-wrap items-end gap-4">
-          <div className="w-64"><label className="label">Trusted domain (optional)</label><input className="input" value={trusted} onChange={(e) => setTrusted(e.target.value)} placeholder={active?.trusted_domain || 'e.g. yourbank.com'} /></div>
-          <label className="flex items-center gap-2 text-sm text-[#B4C0D6]"><input type="checkbox" className="accent-cyan-400" checked={lookup} onChange={(e) => setLookup(e.target.checked)} />Look up the sending infrastructure (DNS, RDAP)</label>
+          <div className="w-64"><label className="label">Trusted domain (optional)</label><input className="input" aria-label="Trusted domain (optional)" value={trusted} onChange={(e) => setTrusted(e.target.value)} placeholder={active?.trusted_domain || 'e.g. yourbank.com'} /></div>
+          <label className="tap flex items-center gap-2 text-sm text-[#B4C0D6]"><input type="checkbox" className="accent-cyan-400" checked={lookup} onChange={(e) => setLookup(e.target.checked)} />Look up the sending infrastructure (DNS, RDAP)</label>
           <div className="ml-auto flex items-center gap-3">{file && <button type="button" className="btn-ghost" onClick={() => setFile(null)}>Clear file</button>}<button className="btn-primary" disabled={busy || (!file && !raw.trim())}>Analyze</button></div>
         </div>
         <CaseTarget saved={res?.saved_to_case} />
@@ -61,30 +61,30 @@ export function EmailResult({ r }) {
             <AuthRow name="SPF" result={a.spf?.result} detail={a.spf?.domain} />
             {a.dkim.length ? a.dkim.map((d, i) => <AuthRow key={i} name="DKIM" result={d.result} detail={`d=${d.domain}`} />) : <AuthRow name="DKIM" />}
             <AuthRow name="DMARC" result={a.dmarc?.result} detail={a.dmarc?.header_from} />
-            <p className="pt-1 text-xs text-[#5B6A86]">By {a.primary_authserv || 'unknown server'}. A pass proves authorization by the domain shown, not trustworthiness.</p>
+            <p className="pt-1 text-xs text-[#7989A8]">By {a.primary_authserv || 'unknown server'}. A pass proves authorization by the domain shown, not trustworthiness.</p>
           </div>
         </Section>
       </div>
       <Section eyebrow="Oldest → newest" title={`Delivery route · ${r.route.count} hops`}>
         <Trace route={r.route} />
-        <p className="mt-4 text-xs text-[#5B6A86]">Hops written before the message reached the recipient's provider can be forged. The lit hand-off hop is the most reliable sender-side address. It identifies a mail server, not a person.</p>
+        <p className="mt-4 text-xs text-[#7989A8]">Hops written before the message reached the recipient's provider can be forged. The lit hand-off hop is the most reliable sender-side address. It identifies a mail server, not a person.</p>
       </Section>
       <div className="grid gap-4 lg:grid-cols-2">
         <Section eyebrow="Inference" title="Sending provider & where to report">
           {r.sending_provider ? (
             <div className="space-y-3 text-sm">
               <div><span className="font-display text-lg text-white">{r.sending_provider.name}</span> <Pill tone="amber">ASSUMPTION</Pill></div>
-              <div className="text-xs text-[#5B6A86]">Signals: {[...r.sending_provider.domain_signals, ...r.sending_provider.header_signals].join(', ')}</div>
+              <div className="text-xs text-[#7989A8]">Signals: {[...r.sending_provider.domain_signals, ...r.sending_provider.header_signals].join(', ')}</div>
               <ul className="space-y-1">{r.sending_provider.report.map((c, i) => <li key={i}>• {c.label}{c.email && <span className="mono text-trace"> {c.email}</span>}{c.url && <span className="mono text-trace"> {c.url}</span>}</li>)}</ul>
-            </div>) : <p className="text-sm text-[#5B6A86]">Provider not identified from the headers.</p>}
+            </div>) : <p className="text-sm text-[#7989A8]">Provider not identified from the headers.</p>}
           {r.lookups_performed && <div className="mt-4"><div className="label">Abuse contacts from lookups</div><AbuseContacts contacts={r.abuse_contacts || []} empty="None found (lookups may have failed; see UNKNOWN findings)." /></div>}
         </Section>
         <Section eyebrow="Sender device" title="Originating-client headers">
           <table className="w-full"><tbody>
             {r.originating_headers.filter((o) => o.present || !['X-Mailer', 'User-Agent', 'X-AntiAbuse', 'X-Apparently-From', 'X-Authenticated-Sender'].includes(o.header)).map((o) => (
-              <tr key={o.header} className="border-b border-line/60"><td className="td mono w-44">{o.header}</td><td className="td">{o.present ? <span className="mono text-assume">{o.values.join(', ')}</span> : <span className="text-[#5B6A86]">not present</span>}</td></tr>))}
+              <tr key={o.header} className="border-b border-line/60"><td className="td mono w-44">{o.header}</td><td className="td">{o.present ? <span className="mono text-assume">{o.values.join(', ')}</span> : <span className="text-[#7989A8]">not present</span>}</td></tr>))}
           </tbody></table>
-          <p className="mt-3 text-xs text-[#5B6A86]">Major webmail providers strip the sender's device IP, so "not present" is normal. When present, these IPs identify a network, possibly a VPN or carrier, never a person.</p>
+          <p className="mt-3 text-xs text-[#7989A8]">Major webmail providers strip the sender's device IP, so "not present" is normal. When present, these IPs identify a network, possibly a VPN or carrier, never a person.</p>
         </Section>
       </div>
       <ScamPanel r={r} />
@@ -95,9 +95,9 @@ export function EmailResult({ r }) {
             <li key={i} className={`rounded-xl border p-3 ${l.text_href_mismatch || l.flags.length ? 'border-danger/40 bg-danger/5' : 'border-line'}`}>
               <div className="mono text-[#E6EDF7]">{l.final_defanged}</div>
               {l.display_text && <div className="mt-1 text-xs text-[#8392AE]">Link text: “{l.display_text}” {l.text_href_mismatch && <Pill tone="red">text ≠ destination</Pill>}</div>}
-              {l.wrappers.length > 0 && <div className="mt-1 text-xs text-[#5B6A86]">Unwrapped from: {l.wrappers.join(' → ')}</div>}
+              {l.wrappers.length > 0 && <div className="mt-1 text-xs text-[#7989A8]">Unwrapped from: {l.wrappers.join(' → ')}</div>}
               <div className="mt-2 flex flex-wrap items-center gap-1">{l.flags.map((f) => <Pill key={f} tone="amber">{f}</Pill>)}<Link to={`/url?u=${encodeURIComponent(l.final_url)}`} className="ml-auto text-xs text-trace hover:underline">Analyze URL →</Link></div>
-            </li>))}</ul> : <p className="text-sm text-[#5B6A86]">No links found.</p>}
+            </li>))}</ul> : <p className="text-sm text-[#7989A8]">No links found.</p>}
         </Section>
         <Section eyebrow="Not opened" title={`Attachments (${r.attachments.length})`}>
           {r.attachments.length ? <ul className="space-y-2">{r.attachments.map((at, i) => (
@@ -105,7 +105,7 @@ export function EmailResult({ r }) {
               <div className="flex flex-wrap items-center gap-2"><span className="font-medium text-[#E6EDF7]">{at.filename}</span><Pill>{at.size} bytes</Pill>{at.extension_mismatch && <Pill tone="red">type mismatch</Pill>}</div>
               <div className="mt-1 text-xs text-[#8392AE]">Declared {at.content_type} · detected <b className="text-[#E6EDF7]">{at.detected_type}</b></div>
               <div className="mt-1 flex items-center gap-2"><span className="mono text-[#8392AE]">sha256 {at.hashes.sha256}</span><CopyButton text={at.hashes.sha256} /></div>
-            </li>))}</ul> : <p className="text-sm text-[#5B6A86]">No attachments.</p>}
+            </li>))}</ul> : <p className="text-sm text-[#7989A8]">No attachments.</p>}
         </Section>
       </div>
       <FindingsList findings={collectAll(r)} />
@@ -114,5 +114,5 @@ export function EmailResult({ r }) {
   )
 }
 function AuthRow({ name, result, detail }) {
-  return <div className="flex items-center justify-between gap-2 rounded-lg bg-ink-950/60 px-3 py-2"><span className="font-medium text-[#E6EDF7]">{name}</span><span className="flex items-center gap-2"><span className="mono text-xs text-[#5B6A86]">{detail}</span><Pill tone={authTone(result)}>{result || 'not recorded'}</Pill></span></div>
+  return <div className="flex items-center justify-between gap-2 rounded-lg bg-ink-950/60 px-3 py-2"><span className="font-medium text-[#E6EDF7]">{name}</span><span className="flex items-center gap-2"><span className="mono text-xs text-[#7989A8]">{detail}</span><Pill tone={authTone(result)}>{result || 'not recorded'}</Pill></span></div>
 }

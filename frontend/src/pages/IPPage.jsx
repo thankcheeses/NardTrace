@@ -15,7 +15,7 @@ export default function IPPage() {
     <>
       <PageHeader eyebrow="IP intelligence" title="Who runs this address?" subtitle="Registry ownership (RDAP), abuse contact, reverse DNS and approximate network location. An IP address identifies a network, never a person or a home address." />
       <form className="card mb-6 space-y-3" onSubmit={(e) => { e.preventDefault(); run(ip.trim()) }}>
-        <div className="flex gap-3"><input className="input font-mono" value={ip} onChange={(e) => setIp(e.target.value)} placeholder="209.85.220.41 or 2001:db8::1" /><button className="btn-primary" disabled={busy || !ip.trim()}>Look up</button></div>
+        <div className="flex gap-3"><input className="input font-mono" aria-label="IP address" value={ip} onChange={(e) => setIp(e.target.value)} placeholder="209.85.220.41 or 2001:db8::1" /><button className="btn-primary" disabled={busy || !ip.trim()}>Look up</button></div>
         <CaseTarget saved={res?.saved_to_case} />
       </form>
       {busy && <Spinner label="Querying RDAP, DNS and geolocation…" />}<ErrorBox error={err} />

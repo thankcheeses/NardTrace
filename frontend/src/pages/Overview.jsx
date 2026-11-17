@@ -48,7 +48,7 @@ export default function Overview() {
       </PageHeader>
       <ErrorBox error={err} />
       <form onSubmit={go} className="card mb-6 border-trace/30 shadow-glow">
-        <textarea className="input min-h-[96px] resize-y font-mono text-[13px]" value={q} onChange={(e) => setQ(e.target.value)} placeholder={'209.85.220.41\nsecure-paypa1-review.top\nhxxps://bit[.]ly/abc\nReceived: from … (paste full headers)'} />
+        <textarea className="input min-h-[96px] resize-y font-mono text-[13px]" aria-label="IP address, domain, link, file hash or raw email headers" value={q} onChange={(e) => setQ(e.target.value)} placeholder={'209.85.220.41\nsecure-paypa1-review.top\nhxxps://bit[.]ly/abc\nReceived: from … (paste full headers)'} />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <span className="text-xs text-[#8392AE]">{kind ? <>Looks like <span className="text-trace">{kind[0].slice(1) === 'file' ? 'a file hash' : kind[0].slice(1) === 'email' ? 'email headers' : kind[0].slice(1) === 'ip' ? 'an IP address' : kind[0].slice(1) === 'url' ? 'a URL' : 'a domain'}</span>.</> : <>Or <Link to="/email" className="text-trace underline">drop an .eml file</Link> in the Email analyzer.</>}</span>
           <button className="btn-primary" disabled={!kind}>Investigate</button>
@@ -59,20 +59,20 @@ export default function Overview() {
         <Stat label="High-severity findings" value={stats?.high ?? '–'} tone={stats?.high ? 'danger' : undefined} /><Stat label="Abuse contacts found" value={stats?.contacts ?? '–'} tone="trace" hint="from RDAP lookups" />
       </div>
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <section className="card">
-          <div className="mb-3 flex items-center justify-between"><h2 className="h2">Recent cases</h2><Link to="/cases" className="text-xs text-trace hover:underline">All cases →</Link></div>
+        <section className="card min-w-0">
+          <div className="mb-3 flex items-center justify-between"><h2 className="h2">Recent cases</h2><Link to="/cases" className="tap text-xs text-trace hover:underline">All cases →</Link></div>
           {cases.length ? cases.slice(0, 6).map((c) => { const r = stats?.risks?.[c.id]; return (
-            <Link key={c.id} to={`/cases/${c.id}`} className="flex items-center justify-between gap-3 border-b border-line py-2.5 text-sm last:border-0 hover:text-trace">
-              <span className="truncate"><span className="mr-2 font-mono text-[11px] text-[#5B6A86]">#{c.id}</span>{c.title}</span>
+            <Link key={c.id} to={`/cases/${c.id}`} className="flex min-h-[44px] items-center justify-between gap-3 border-b border-line py-2.5 text-sm last:border-0 hover:text-trace">
+              <span className="truncate"><span className="mr-2 font-mono text-[11px] text-[#7989A8]">#{c.id}</span>{c.title}</span>
               <span className="flex shrink-0 items-center gap-2 text-xs text-[#8392AE]">{r && <Pill tone={r.score >= 60 ? 'red' : r.score >= 30 ? 'amber' : 'slate'}>{r.level}</Pill>}{c.analysis_count} analyses</span>
             </Link>) }) : <Empty icon="cases">No cases yet. Create one from Cases &amp; reports, or load the demo case.</Empty>}
         </section>
-        <section className="card">
+        <section className="card min-w-0">
           <h2 className="h2 mb-3">How findings are labelled</h2>
           <div className="space-y-2 text-sm text-[#B4C0D6]">
             {[['CONFIRMED', 'seen directly in the evidence'], ['EXTERNAL INTEL', 'reported by registries, DNS or reputation services'], ['ASSUMPTION', 'an inference that could be wrong'], ['UNKNOWN', 'could not be determined; never guessed']].map(([s, d]) => <div key={s} className="flex items-start gap-2"><StatusBadge status={s} icon className="mt-0.5" /><span>{d}</span></div>)}
           </div>
-          <p className="mt-4 border-t border-line pt-3 text-xs leading-relaxed text-[#5B6A86]">An IP address identifies a network, never a person. Location is always approximate. NardTrace never visits links or opens attachments.</p>
+          <p className="mt-4 border-t border-line pt-3 text-xs leading-relaxed text-[#7989A8]">An IP address identifies a network, never a person. Location is always approximate. NardTrace never visits links or opens attachments.</p>
         </section>
       </div>
     </>

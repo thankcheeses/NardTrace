@@ -19,8 +19,8 @@ export default function DomainPage() {
       <PageHeader eyebrow="Domain intelligence" title="Is this domain what it claims?" subtitle="DNS (A, AAAA, MX, NS, TXT/SPF, DMARC, CAA), registration via RDAP, domain-age warnings and lookalike detection. Registrant identities are not unmasked." />
       <form className="card mb-6 space-y-3" onSubmit={(e) => { e.preventDefault(); run() }}>
         <div className="grid gap-3 md:grid-cols-[1fr_260px_auto]">
-          <input className="input font-mono" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="suspicious-domain.example (defanged input OK)" />
-          <input className="input" value={trusted} onChange={(e) => setTrusted(e.target.value)} placeholder={`Trusted domain ${active?.trusted_domain ? `(${active.trusted_domain})` : '(optional)'}`} />
+          <input className="input font-mono" aria-label="Domain" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="suspicious-domain.example (defanged input OK)" />
+          <input className="input" aria-label="Trusted domain (optional)" value={trusted} onChange={(e) => setTrusted(e.target.value)} placeholder={`Trusted domain ${active?.trusted_domain ? `(${active.trusted_domain})` : '(optional)'}`} />
           <button className="btn-primary" disabled={busy || !domain.trim()}>Analyze</button>
         </div>
         <CaseTarget saved={res?.saved_to_case} />

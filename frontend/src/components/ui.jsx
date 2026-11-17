@@ -40,7 +40,7 @@ export function KV({ rows }) {
       {rows.filter(Boolean).map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="text-[#8392AE]">{k}</dt>
-          <dd className="min-w-0 break-words text-[#E6EDF7]">{v === null || v === undefined || v === '' ? <span className="text-[#5B6A86]">—</span> : v}</dd>
+          <dd className="min-w-0 break-words text-[#E6EDF7]">{v === null || v === undefined || v === '' ? <span className="text-[#7989A8]">—</span> : v}</dd>
         </div>
       ))}
     </dl>
@@ -58,7 +58,7 @@ export function Collapsible({ title, children, defaultOpen = false }) {
   return (
     <div className="rounded-xl border border-line bg-ink-900/60">
       <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm font-medium text-[#E6EDF7] hover:bg-ink-800/60">
-        {title}<Icon name={open ? 'chevronDown' : 'chevronRight'} className="h-4 w-4 shrink-0 text-[#5B6A86]" />
+        {title}<Icon name={open ? 'chevronDown' : 'chevronRight'} className="h-4 w-4 shrink-0 text-[#7989A8]" />
       </button>
       {open && <div className="border-t border-line p-4">{children}</div>}
     </div>
@@ -85,7 +85,7 @@ export function Empty({ icon = 'cases', children, action, className = '' }) {
   return (
     <div className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-line px-6 py-10 text-center ${className}`}>
       <Icon name={icon} className="h-10 w-10 text-[#2A3C5C]" strokeWidth={1.2} />
-      <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#5B6A86]">{children}</p>
+      <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#7989A8]">{children}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   )

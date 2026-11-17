@@ -59,7 +59,7 @@ export function Verdict({ result }) {
         <div><div className="eyebrow mb-2">Do this next</div>
           {steps.length ? <ol className="space-y-2 text-sm text-[#D6DEEC]">{steps.map((x, i) => <li key={i} className="flex gap-2"><span className="mt-[3px] h-1.5 w-1.5 shrink-0 rounded-full bg-trace" />{x}</li>)}</ol>
                         : <p className="text-sm text-[#8392AE]">No high-severity findings. Still verify the sender through a channel you already trust before acting on the message.</p>}
-          <div className="mt-3 text-xs text-[#5B6A86]">{high.length} high · {all.filter((f) => f.severity === 'medium').length} medium</div>
+          <div className="mt-3 text-xs text-[#7989A8]">{high.length} high · {all.filter((f) => f.severity === 'medium').length} medium</div>
         </div>
       </div>
     </section>

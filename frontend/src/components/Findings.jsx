@@ -14,7 +14,7 @@ export function FindingCard({ f }) {
           <div className="flex flex-wrap items-center gap-2"><StatusBadge status={f.status} /><span className="font-medium text-[#E6EDF7]">{f.title}</span></div>
           {!open && <p className="mt-1 truncate text-xs text-[#8392AE]">{f.what_found}</p>}
         </div>
-        <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-[#5B6A86]">{f.confidence}</span>
+        <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-[#7989A8]">{f.confidence}</span>
       </button>
       {open && (
         <div className="grid gap-3 border-t border-line px-4 py-3 text-sm md:grid-cols-2">
@@ -37,16 +37,16 @@ export function FindingsList({ findings = [], title = 'Findings' }) {
   return (
     <section className="card">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="h2">{title} <span className="text-[#5B6A86]">({findings.length})</span></h2>
+        <h2 className="h2">{title} <span className="text-[#7989A8]">({findings.length})</span></h2>
         <div className="flex flex-wrap gap-1">
           {['ALL', ...ORDER].map((s) => (
-            <button key={s} onClick={() => setFilter(s)} className={`rounded px-2 py-1 font-mono text-[10px] font-semibold tracking-wider ${filter === s ? 'bg-trace text-ink-950' : 'bg-ink-700 text-[#B4C0D6] hover:bg-ink-600'}`}>
+            <button key={s} onClick={() => setFilter(s)} className={`tap rounded px-2 py-1 font-mono text-[10px] font-semibold tracking-wider ${filter === s ? 'bg-trace text-ink-950' : 'bg-ink-700 text-[#B4C0D6] hover:bg-ink-600'}`}>
               {s === 'ALL' ? `ALL ${findings.length}` : `${s} ${counts[s]}`}
             </button>
           ))}
         </div>
       </div>
-      <div className="space-y-2">{shown.map((f, i) => <FindingCard key={`${f.title}-${i}`} f={f} />)}{!shown.length && <p className="text-sm text-[#5B6A86]">No findings in this category.</p>}</div>
+      <div className="space-y-2">{shown.map((f, i) => <FindingCard key={`${f.title}-${i}`} f={f} />)}{!shown.length && <p className="text-sm text-[#7989A8]">No findings in this category.</p>}</div>
     </section>
   )
 }
