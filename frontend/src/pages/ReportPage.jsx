@@ -1,7 +1,7 @@
-import { marked } from 'marked'
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useCases } from '../CaseContext'
+import { renderReportHtml } from '../engine/reportHtml'
 
 const CSS = `
 .report { font-family: Inter, system-ui, sans-serif; color: #e6edf7; max-width: 900px; margin: 0 auto; line-height: 1.5; font-size: 14px; }
@@ -30,11 +30,7 @@ export default function ReportPage() {
   const redact = params.get('redact') === '1'
   useEffect(() => {
     if (!backend) return
-    backend.reportMarkdown(Number(id), redact).then((md) => {
-      let h = marked.parse(md)
-      h = h.replace(/\[(CONFIRMED|EXTERNAL INTEL|ASSUMPTION|UNKNOWN)\]/g, (_, s) => `<span class="tag t-${s.split(' ')[0]}">${s}</span>`)
-      setHtml(h)
-    })
+    backend.reportMarkdown(Number(id), redact).then((md) => setHtml(renderReportHtml(md)))
   }, [backend, id, redact])
   return (
     <div className="min-h-screen bg-ink-950 px-6 py-6 print:bg-white print:p-0">

@@ -57,7 +57,7 @@ What was found · where the evidence came from · what it means in plain English
 
 The web edition also ships as a native shell: `frontend/android/` is a [Capacitor](https://capacitorjs.com) project that packages the on-device build (`npm run build:app`) as an Android app with the same engine, storage and privacy model as the browser. The `Android APK` workflow builds a debug APK on every push to `main` that touches `frontend/` and attaches it to the run as an artifact; `frontend/assets/icon.png` is the launcher-icon source. See `docs/research/app-store-publishing.md` for the Play Store and App Store path, and `site/privacy.html` for the policy both stores require.
 
-The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 26 engine tests; `pytest` runs 54 backend tests).
+The same React interface drives both. On load it probes `/api/health`; if the backend answers it uses the server, otherwise the in-browser engine. Both engines produce identical result shapes, and both are tested against the same synthetic `.eml` fixtures (`npm test` runs 33 engine and report tests; `pytest` runs 54 backend tests).
 
 ## Quick start
 
@@ -100,6 +100,14 @@ cd backend && python -m pytest
 The suite (54 tests) runs fully offline against **synthetic** `.eml` fixtures in `backend/tests/fixtures/`, which
 contain no real personal data. CI (`.github/workflows/ci.yml`) runs the tests, builds the frontend, builds the Docker
 image, and smoke-tests it by generating a PDF report.
+
+### Untrusted input in reports
+
+Everything in a report can come from the message under investigation: the subject, sender names, header
+values, link text. The report is written as Markdown and shown as HTML, so `frontend/src/engine/reportHtml.js`
+renders it with three rules: raw HTML is shown as text, links are kept only for `http(s)`, `mailto` and
+in-page targets, and images are never emitted. `frontend/tests/reportHtml.test.js` holds the injections
+this stops.
 
 ### Configuration
 
